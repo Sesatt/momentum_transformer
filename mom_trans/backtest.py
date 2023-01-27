@@ -565,6 +565,7 @@ def run_all_windows(
     """
     # run the expanding window
     for interval in train_intervals:
+        print(interval)
         run_single_window(
             experiment_name,
             features_file_path,
