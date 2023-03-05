@@ -9,7 +9,7 @@ import numpy as np
 from functools import reduce
 
 # define the asset class of each ticker here - for this example we have not done this
-TEST_MODE = False
+TEST_MODE = True
 ASSET_CLASS_MAPPING = dict(zip(QUANDL_TICKERS, ["COMB"] * len(QUANDL_TICKERS)))
 TRAIN_VALID_RATIO = 0.90
 TIME_FEATURES = False
