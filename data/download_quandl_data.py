@@ -6,6 +6,26 @@ import os
 
 DEPTH = 1
 
+# def main(api_key: str):
+#     quandl.ApiConfig.api_key = api_key
+
+#     if not os.path.exists(os.path.join("data", "quandl")):
+#         os.mkdir(os.path.join("data", "quandl"))
+
+#     for t in ALL_QUANDL_CODES:
+#         print(t)
+#         try:
+#             data = quandl.get(
+#                 f"{t}{DEPTH}",
+#                 start_date="1988-01-01",
+#             )
+#         except BaseException as ex:
+#             print(ex)
+#         if ("Settle" in data.columns) and (data.index.min() <= dt.datetime(2015, 1, 1)):
+#             data[["Settle"]].to_csv(
+#                 os.path.join("data", "quandl", f"{t.split('/')[-1]}.csv")
+#             )
+
 def main(api_key: str):
     quandl.ApiConfig.api_key = api_key
 
@@ -15,17 +35,15 @@ def main(api_key: str):
     for t in ALL_QUANDL_CODES:
         print(t)
         try:
-            data = quandl.get(
-                f"{t}{DEPTH}",
-                start_date="1988-01-01",
-            )
+            data = quandl.get("WIKI/"+t+".4", 
+                        start_date="1988-01-01")
         except BaseException as ex:
             print(ex)
-        if ("Settle" in data.columns) and (data.index.min() <= dt.datetime(2015, 1, 1)):
+        if ("Close" in data.columns) and (data.index.min() <= dt.datetime(2015, 1, 1)):
+            data.rename(columns={'Close':'Settle'}, inplace=True)
             data[["Settle"]].to_csv(
-                os.path.join("data", "quandl", f"{t.split('/')[-1]}.csv")
+                os.path.join("data", "quandl", f"{t}.csv")
             )
-
 
 if __name__ == "__main__":
 
