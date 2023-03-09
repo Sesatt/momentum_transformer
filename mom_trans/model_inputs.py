@@ -523,8 +523,12 @@ class ModelFeatures:
                 for k in col_mappings:
                     cols = col_mappings[k]
                     arr = _batch_single_entity(sliced[cols].copy())
-                    print(sliced[id_col], arr.shape)
-
+                    
+                    if arr == None: 
+                        break
+                    else:
+                        print(sliced[id_col].ticker.unique())
+                        
                     if k not in data_map:
                         data_map[k] = [arr]
                     else:
