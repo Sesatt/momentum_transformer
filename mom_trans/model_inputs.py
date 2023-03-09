@@ -525,7 +525,7 @@ class ModelFeatures:
                     arr = _batch_single_entity(sliced[cols].copy())
                     
                     try:  
-                        print(sliced[id_col].ticker.unique())
+                        print(arr.shape)
                     except:
                         print("output is None")
                         break
