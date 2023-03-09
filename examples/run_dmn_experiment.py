@@ -117,7 +117,7 @@ def main(
             intervals,
             params,
             changepoint_lbws,
-            ASSET_CLASS_MAPPING,
+            INDUSTRY_MAPPING,
             [32, 64, 128] if lstm_time_steps == 252 else HP_MINIBATCH_SIZE,
             test_window_size,
         )
