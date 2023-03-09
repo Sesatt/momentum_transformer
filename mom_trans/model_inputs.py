@@ -524,9 +524,10 @@ class ModelFeatures:
                     cols = col_mappings[k]
                     arr = _batch_single_entity(sliced[cols].copy())
                     
-                    if arr != None: 
+                    try:  
                         print(sliced[id_col].ticker.unique())
-                    else:
+                    except:
+                        print("output is None")
                         break
                         
                     if k not in data_map:
