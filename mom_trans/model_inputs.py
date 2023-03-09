@@ -178,7 +178,7 @@ class ModelFeatures:
                     )
                 )
 
-#         self.transform_real_inputs = transform_real_inputs
+        self.transform_real_inputs = transform_real_inputs
 
         # for static_variables
         # self._column_definition.append(("ticker", DataTypes.CATEGORICAL, InputTypes.STATIC_INPUT))
