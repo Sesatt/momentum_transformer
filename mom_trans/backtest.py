@@ -269,17 +269,22 @@ def aggregate_and_save_all_windows(
 
     if asset_class_dictionary:
         asset_classes = ["ALL"] + _get_asset_classes(asset_class_dictionary)
+        asset_class_tickers = (
+        pd.DataFrame.from_dict(asset_class_dictionary, orient="index")
+        .reset_index()
+        .set_index(0)
+    )
     else:
         asset_classes = ["ALL"]
 
     average_metrics = {}
     list_metrics = {}
 
-    asset_class_tickers = (
-        pd.DataFrame.from_dict(asset_class_dictionary, orient="index")
-        .reset_index()
-        .set_index(0)
-    )
+#     asset_class_tickers = (
+#         pd.DataFrame.from_dict(asset_class_dictionary, orient="index")
+#         .reset_index()
+#         .set_index(0)
+#     )
 
     for asset_class in asset_classes:
         average_results = dict(
