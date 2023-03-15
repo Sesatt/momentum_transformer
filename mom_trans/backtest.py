@@ -517,8 +517,8 @@ def run_single_window(
             )
         )
     
-#     attention_weights = dmn.get_attention(model_features.test_sliding, self.minibatch_size)
-#     attention_weights.to_csv(os.path.join(directory, "attention_weights.csv"))
+    attention_weights = dmn.get_attention(model_features.test_sliding, hp_minibatch_size)
+    attention_weights.to_csv(os.path.join(directory, "attention_weights.csv"))
     
     # save model and get rid of the hp dir
     best_directory = os.path.join(directory, "best")
