@@ -518,8 +518,9 @@ def run_single_window(
         )
         
     attention_weights = dmn.get_attention(model_features.test_sliding, best_hp["batch_size"])
-    with open(os.path.join(directory, "attention_weights.json"), "w") as file:
-        file.write(json.dumps(attention_weights, indent = 4))
+    pd.DataFrame.from_dict(attention_weights, orient = 'index').to_csv(os.path.join(directory,'attention_weights.csv'))
+#     with open(os.path.join(directory, "attention_weights.json"), "w") as file:
+#         file.write(json.dumps(attention_weights, indent = 4))
         
     # save model and get rid of the hp dir
     best_directory = os.path.join(directory, "best")
