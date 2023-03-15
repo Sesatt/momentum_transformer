@@ -517,9 +517,13 @@ def run_single_window(
             )
         )
     
+    with open(os.path.join(directory, "attention_weights.json"), "w") as file:
+        file.write(json.dumps(attention_weights, indent = 4))
+        
     attention_weights = dmn.get_attention(model_features.test_sliding, best_hp["batch_size"])
-    attention_weights.to_csv(os.path.join(directory, "attention_weights.csv"))
-    
+    with open(os.path.join(directory, "attention_weights.json"), "w") as file:
+        file.write(json.dumps(attention_weights, indent = 4))
+        
     # save model and get rid of the hp dir
     best_directory = os.path.join(directory, "best")
     best_model.save_weights(os.path.join(best_directory, "checkpoints", "checkpoint"))
