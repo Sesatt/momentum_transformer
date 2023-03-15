@@ -516,9 +516,6 @@ def run_single_window(
                 indent=4,
             )
         )
-    
-    with open(os.path.join(directory, "attention_weights.json"), "w") as file:
-        file.write(json.dumps(attention_weights, indent = 4))
         
     attention_weights = dmn.get_attention(model_features.test_sliding, best_hp["batch_size"])
     with open(os.path.join(directory, "attention_weights.json"), "w") as file:
