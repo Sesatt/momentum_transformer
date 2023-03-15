@@ -10,7 +10,7 @@ import numpy as np
 from functools import reduce
 
 # define the asset class of each ticker here - for this example we have not done this
-TEST_MODE = True
+TEST_MODE = False
 # ASSET_CLASS_MAPPING = INDUSTRY_MAPPING
 ASSET_CLASS_MAPPING = None
 TRAIN_VALID_RATIO = 0.90
