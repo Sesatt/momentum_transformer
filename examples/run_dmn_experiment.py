@@ -16,7 +16,7 @@ TRAIN_VALID_RATIO = 0.90
 TIME_FEATURES = False
 FORCE_OUTPUT_SHARPE_LENGTH = None
 EVALUATE_DIVERSIFIED_VAL_SHARPE = True
-NAME = "experiment_quandl_500stocks"
+NAME = "experiment_bitcoin"
 
 
 def main(
@@ -62,7 +62,8 @@ def main(
     else:
         raise BaseException("Invalid experiment.")
 
-    versions = range(1, 1 + num_repeats) if not TEST_MODE else [1]
+#     versions = range(1, 1 + num_repeats) if not TEST_MODE else [1]
+    versions = [1]
 
     experiment_prefix = (
         NAME
