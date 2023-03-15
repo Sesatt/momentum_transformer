@@ -11,7 +11,8 @@ from functools import reduce
 
 # define the asset class of each ticker here - for this example we have not done this
 TEST_MODE = False
-ASSET_CLASS_MAPPING = INDUSTRY_MAPPING
+# ASSET_CLASS_MAPPING = INDUSTRY_MAPPING
+ASSET_CLASS_MAPPING = None
 TRAIN_VALID_RATIO = 0.90
 TIME_FEATURES = False
 FORCE_OUTPUT_SHARPE_LENGTH = None
@@ -118,7 +119,7 @@ def main(
             intervals,
             params,
             changepoint_lbws,
-            INDUSTRY_MAPPING,
+            ASSET_CLASS_MAPPING,
             [32, 64, 128] if lstm_time_steps == 252 else HP_MINIBATCH_SIZE,
             test_window_size,
         )
