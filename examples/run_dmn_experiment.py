@@ -3,19 +3,20 @@ import argparse
 from settings.hp_grid import HP_MINIBATCH_SIZE
 import pandas as pd
 from settings.default import QUANDL_TICKERS
+# from settings.default import INDUSTRY_MAPPING
 from settings.fixed_params import MODLE_PARAMS
 from mom_trans.backtest import run_all_windows
 import numpy as np
 from functools import reduce
 
 # define the asset class of each ticker here - for this example we have not done this
-TEST_MODE = True
-ASSET_CLASS_MAPPING = dict(zip(QUANDL_TICKERS, ["COMB"] * len(QUANDL_TICKERS)))
+TEST_MODE = False
+ASSET_CLASS_MAPPING = dict(zip(QUANDL_TICKERS, ["CRYPTO"] * len(QUANDL_TICKERS)))
 TRAIN_VALID_RATIO = 0.90
 TIME_FEATURES = False
 FORCE_OUTPUT_SHARPE_LENGTH = None
 EVALUATE_DIVERSIFIED_VAL_SHARPE = True
-NAME = "experiment_quandl_100assets"
+NAME = "experiment_crypto"
 
 
 def main(
@@ -61,7 +62,8 @@ def main(
     else:
         raise BaseException("Invalid experiment.")
 
-    versions = range(1, 1 + num_repeats) if not TEST_MODE else [1]
+#     versions = range(1, 1 + num_repeats) if not TEST_MODE else [1]
+    versions = [1]
 
     experiment_prefix = (
         NAME
@@ -151,7 +153,7 @@ if __name__ == "__main__":
             metavar="s",
             type=int,
             nargs="?",
-            default=1990,
+            default=2016,
             help="Training start year",
         )
         parser.add_argument(
@@ -159,7 +161,7 @@ if __name__ == "__main__":
             metavar="t",
             type=int,
             nargs="?",
-            default=2016,
+            default=2020,
             help="Training end year and test start year.",
         )
         parser.add_argument(
@@ -167,7 +169,7 @@ if __name__ == "__main__":
             metavar="e",
             type=int,
             nargs="?",
-            default=2022,
+            default=2023,
             help="Testing end year.",
         )
         parser.add_argument(

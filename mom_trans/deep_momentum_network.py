@@ -28,6 +28,8 @@ from settings.fixed_params import MODLE_PARAMS
 from mom_trans.model_inputs import ModelFeatures
 from empyrical import sharpe_ratio
 
+from keras_tuner.distribute import utils as ds_utils
+
 
 class SharpeLoss(tf.keras.losses.Loss):
     def __init__(self, output_size: int = 1):
@@ -109,7 +111,7 @@ class SharpeValidationLoss(keras.callbacks.Callback):
             self.best_sharpe = sharpe
             self.patience_counter = 0  # reset the count
             # self.best_weights = self.model.get_weights()
-            self.model.save_weights(self.weights_save_location)
+            self.model.save_weights(self.weights_save_location, save_format="h5")
         else:
             # if self.verbose: #TODO
             self.patience_counter += 1
@@ -161,6 +163,7 @@ class TunerDiversifiedSharpe(kt.tuners.RandomSearch):
         objective,
         max_trials,
         hp_minibatch_size,
+        # directory = None,
         seed=None,
         hyperparameters=None,
         tune_new_entries=True,
@@ -188,8 +191,10 @@ class TunerDiversifiedSharpe(kt.tuners.RandomSearch):
 
         for callback in original_callbacks:
             if isinstance(callback, SharpeValidationLoss):
+                print(trial.trial_id)
+                # tf. mkdir(os.path.join(str(self.project_dir), "trial_" + str(trial.trial_id)))
                 callback.set_weights_save_loc(
-                    self._get_checkpoint_fname(trial.trial_id, self._reported_step)
+                    self._get_checkpoint_fname(trial.trial_id , self._reported_step)
                 )
 
         # Run the training process multiple times.
@@ -283,6 +288,9 @@ class DeepMomentumNetworkModel(ABC):
     def hyperparameter_search(self, train_data, valid_data):
         data, labels, active_flags, _, _ = ModelFeatures._unpack(train_data)
         val_data, val_labels, val_flags, _, val_time = ModelFeatures._unpack(valid_data)
+
+        # print('Shape of data, labels and val data: ')
+        # print(data.shape, labels.shape, val_data.shape)
 
         if self.evaluate_diversified_val_sharpe:
             val_time_indices, num_val_time = self._index_times(val_time)

@@ -269,17 +269,22 @@ def aggregate_and_save_all_windows(
 
     if asset_class_dictionary:
         asset_classes = ["ALL"] + _get_asset_classes(asset_class_dictionary)
+        asset_class_tickers = (
+        pd.DataFrame.from_dict(asset_class_dictionary, orient="index")
+        .reset_index()
+        .set_index(0)
+    )
     else:
         asset_classes = ["ALL"]
 
     average_metrics = {}
     list_metrics = {}
 
-    asset_class_tickers = (
-        pd.DataFrame.from_dict(asset_class_dictionary, orient="index")
-        .reset_index()
-        .set_index(0)
-    )
+#     asset_class_tickers = (
+#         pd.DataFrame.from_dict(asset_class_dictionary, orient="index")
+#         .reset_index()
+#         .set_index(0)
+#     )
 
     for asset_class in asset_classes:
         average_results = dict(
@@ -511,10 +516,18 @@ def run_single_window(
                 indent=4,
             )
         )
-
+        
+#     attention_weights = dmn.get_attention(model_features.test_sliding, best_hp["batch_size"])
+#     print(attention_weights['historical_flags'])
+#     pd.DataFrame(attention_weights['decoder_self_attn']).to_csv(os.path.join(directory,'attention_weights.csv'))
+#     pd.DataFrame.from_dict(attention_weights, orient = 'index').to_csv(os.path.join(directory,'attention_weights.csv'))
+#     with open(os.path.join(directory, "attention_weights.json"), "w") as file:
+#         file.write(json.dumps(attention_weights, indent = 4))
+        
     # save model and get rid of the hp dir
     best_directory = os.path.join(directory, "best")
-    best_model.save_weights(os.path.join(best_directory, "checkpoints", "checkpoint"))
+    # best_model.save_weights(os.path.join(best_directory, "checkpoints", "checkpoint"))
+    best_model.save_weights(os.path.join(best_directory, "checkpoint"))
     with open(os.path.join(best_directory, "hyperparameters.json"), "w") as file:
         file.write(json.dumps(best_hp, indent=4))
     shutil.rmtree(hp_directory)

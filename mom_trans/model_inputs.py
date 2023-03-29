@@ -113,53 +113,53 @@ class ModelFeatures:
         self.total_time_steps = total_time_steps
         self.lags = lags
 
-        if changepoint_lbws:
-            for lbw in changepoint_lbws:
-                self._column_definition.append(
-                    (f"cp_score_{lbw}", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT)
-                )
-                self._column_definition.append(
-                    (f"cp_rl_{lbw}", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT)
-                )
+#         if changepoint_lbws:
+#             for lbw in changepoint_lbws:
+#                 self._column_definition.append(
+#                     (f"cp_score_{lbw}", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT)
+#                 )
+#                 self._column_definition.append(
+#                     (f"cp_rl_{lbw}", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT)
+#                 )
 
-        if time_features:
-            self._column_definition.append(
-                ("days_from_start", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT)
-            )
-            self._column_definition.append(
-                ("day_of_week", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT)
-            )
-            self._column_definition.append(
-                (f"day_of_month", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT)
-            )
-            self._column_definition.append(
-                (f"week_of_year", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT)
-            )
-            # self._column_definition.append(
-            #     (f"month_of_year", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT)
-            # )
+#         if time_features:
+#             self._column_definition.append(
+#                 ("days_from_start", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT)
+#             )
+#             self._column_definition.append(
+#                 ("day_of_week", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT)
+#             )
+#             self._column_definition.append(
+#                 (f"day_of_month", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT)
+#             )
+#             self._column_definition.append(
+#                 (f"week_of_year", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT)
+#             )
+#             # self._column_definition.append(
+#             #     (f"month_of_year", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT)
+#             # )
 
-            # dataframe could have later years
-            start_date = dt.datetime(start_boundary, 1, 1)
-            days_from_start_max = (dt.datetime(test_end - 1, 12, 31) - start_date).days
-            df["days_from_start"] = (df.index - start_date).days
-            df["days_from_start"] = np.minimum(
-                df["days_from_start"], days_from_start_max
-            )
+#             # dataframe could have later years
+#             start_date = dt.datetime(start_boundary, 1, 1)
+#             days_from_start_max = (dt.datetime(test_end - 1, 12, 31) - start_date).days
+#             df["days_from_start"] = (df.index - start_date).days
+#             df["days_from_start"] = np.minimum(
+#                 df["days_from_start"], days_from_start_max
+#             )
 
-            df["days_from_start"] = (
-                MinMaxScaler().fit_transform(df[["days_from_start"]].values).flatten()
-            )
-            df["day_of_week"] = (
-                MinMaxScaler().fit_transform(df[["day_of_week"]].values).flatten()
-            )
-            df["day_of_month"] = (
-                MinMaxScaler().fit_transform(df[["day_of_month"]].values).flatten()
-            )
-            df["week_of_year"] = (
-                MinMaxScaler().fit_transform(df[["week_of_year"]].values).flatten()
-            )
-            # df["month_of_year"] = MinMaxScaler().fit_transform(df[["month_of_year"]].values).flatten()
+#             df["days_from_start"] = (
+#                 MinMaxScaler().fit_transform(df[["days_from_start"]].values).flatten()
+#             )
+#             df["day_of_week"] = (
+#                 MinMaxScaler().fit_transform(df[["day_of_week"]].values).flatten()
+#             )
+#             df["day_of_month"] = (
+#                 MinMaxScaler().fit_transform(df[["day_of_month"]].values).flatten()
+#             )
+#             df["week_of_year"] = (
+#                 MinMaxScaler().fit_transform(df[["week_of_year"]].values).flatten()
+#             )
+#             # df["month_of_year"] = MinMaxScaler().fit_transform(df[["month_of_year"]].values).flatten()
 
         if add_ticker_as_static:
             self._column_definition.append(
@@ -523,7 +523,13 @@ class ModelFeatures:
                 for k in col_mappings:
                     cols = col_mappings[k]
                     arr = _batch_single_entity(sliced[cols].copy())
-
+                    
+                    try:  
+                        rand_test123 = arr.shape
+                    except:
+                        print("output is None")
+                        break
+                        
                     if k not in data_map:
                         data_map[k] = [arr]
                     else:

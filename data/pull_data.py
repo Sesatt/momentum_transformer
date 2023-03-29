@@ -5,8 +5,12 @@ import pandas as pd
 import yfinance as yf
 
 import numpy as np
+import requests
+import json
+import pandas as pd
+import datetime
 
-from settings.default import PINNACLE_DATA_CUT, PINNACLE_DATA_FOLDER
+from settings.default import PINNACLE_DATA_CUT, PINNACLE_DATA_FOLDER, QUANDL_TICKERS
 
 def pull_quandl_sample_data(ticker: str) -> pd.DataFrame:
     return (
@@ -15,6 +19,22 @@ def pull_quandl_sample_data(ticker: str) -> pd.DataFrame:
         .set_index("date")
         .replace(0.0, np.nan)
     )
+
+def pull_crypto_data(ticker) -> pd.DataFrame:
+    comparison_symbol = 'USD'
+    limit = 2000
+    aggregate = 1
+    api_key = '9902c6ffc3d85502297744648e73bee86fd5af1f9ba3ac4a6c444e42537a73d4'
+
+    url = 'https://min-api.cryptocompare.com/data/v2/histoday?fsym={}&tsym={}&limit={}&aggregate={}&allData=true&api_key={}'.format(
+        ticker.upper(), comparison_symbol.upper(), limit, aggregate, api_key)
+    response = requests.get(url)
+    df = pd.DataFrame(response.json()['Data']['Data'])
+    df['time'] = [datetime.date.fromtimestamp(d) for d in df.time]
+    df = df[['time', 'close']].rename(columns = {'time':'Trade Date'}).set_index('Trade Date')[['close']]
+    df.index = df.index.astype("datetime64[ns]")
+    df = df.replace(0, np.nan)
+    return df.dropna()
 
 
 def pull_pinnacle_data(ticker: str) -> pd.DataFrame:
