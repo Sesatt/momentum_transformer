@@ -80,11 +80,11 @@ class ModelFeatures:
         transform_real_inputs=False,  # TODO remove this
         train_valid_ratio=0.9,
         split_tickers_individually=True,
-        add_ticker_as_static=False,
+        add_ticker_as_static=True,
         time_features=False,
         lags=None,
         asset_class_dictionary=None,
-        static_ticker_type_feature = False,
+        static_ticker_type_feature = True,
     ):
         """Initialises formatter. Splits data frame into training-validation-test data frames.
         This also calibrates scaling object, and transforms data for each split."""
