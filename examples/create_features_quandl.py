@@ -25,7 +25,7 @@ def main(
 ):
     features = pd.concat(
         [
-            deep_momentum_strategy_features(pull_crypto_data(ticker)).assign(
+            deep_momentum_strategy_features(pull_quandl_sample_data(ticker)).assign(
                 ticker=ticker
             )
             for ticker in tickers
