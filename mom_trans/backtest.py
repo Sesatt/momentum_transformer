@@ -180,6 +180,7 @@ def save_results(
         asset_class_dictionary (Dict[str, str]): mapping of ticker to asset class
         extra_metrics (dict, optional): additional metrics to save. Defaults to {}.
     """
+    print(asset_classes)
     asset_classes = ["ALL"]
     results_asset_class = [results_sw]
     if asset_class_dictionary:
