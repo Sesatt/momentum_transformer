@@ -3,7 +3,7 @@ import argparse
 from settings.hp_grid import HP_MINIBATCH_SIZE
 import pandas as pd
 from settings.default import QUANDL_TICKERS
-# from settings.default import INDUSTRY_MAPPING
+from settings.default import INDUSTRY_MAPPING
 from settings.fixed_params import MODLE_PARAMS
 from mom_trans.backtest import run_all_windows
 import numpy as np
@@ -11,12 +11,12 @@ from functools import reduce
 
 # define the asset class of each ticker here - for this example we have not done this
 TEST_MODE = False
-ASSET_CLASS_MAPPING = dict(zip(QUANDL_TICKERS, ["CRYPTO"] * len(QUANDL_TICKERS)))
+ASSET_CLASS_MAPPING = INDUSTRY_MAPPING
 TRAIN_VALID_RATIO = 0.90
 TIME_FEATURES = False
 FORCE_OUTPUT_SHARPE_LENGTH = None
 EVALUATE_DIVERSIFIED_VAL_SHARPE = True
-NAME = "experiment_crypto"
+NAME = "experiment_all_industries"
 
 
 def main(
@@ -153,7 +153,7 @@ if __name__ == "__main__":
             metavar="s",
             type=int,
             nargs="?",
-            default=2016,
+            default=1990,
             help="Training start year",
         )
         parser.add_argument(
@@ -161,7 +161,7 @@ if __name__ == "__main__":
             metavar="t",
             type=int,
             nargs="?",
-            default=2020,
+            default=2016,
             help="Training end year and test start year.",
         )
         parser.add_argument(
