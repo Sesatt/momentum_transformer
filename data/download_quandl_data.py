@@ -5,6 +5,7 @@ import argparse
 import os
 
 DEPTH = 1
+prefix = "CHRIS/"
 
 def main(api_key: str):
     quandl.ApiConfig.api_key = api_key
@@ -16,14 +17,14 @@ def main(api_key: str):
         print(t)
         try:
             data = quandl.get(
-                f"{t}{DEPTH}",
-                start_date="1988-01-01",
+                f"{prefix}{t}{DEPTH}",
+                start_date="1980-01-01",
             )
         except BaseException as ex:
             print(ex)
         if ("Settle" in data.columns) and (data.index.min() <= dt.datetime(2015, 1, 1)):
             data[["Settle"]].to_csv(
-                os.path.join("data", "quandl", f"{t.split('/')[-1]}.csv")
+                os.path.join("data", "indices", f"{t.split('/')[-1]}.csv")
             )
 
 # def main(api_key: str):
