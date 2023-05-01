@@ -17,9 +17,6 @@ FEATURES_QUANDL_FILE_PATH = lambda lbw: os.path.join(
 
 FEATURES_QUANDL_FILE_PATH_DEFAULT = FEATURES_QUANDL_FILE_PATH(CPD_DEFAULT_LBW)
 
-# QUANDL_TICKERS = ['AAPL', 'MSFT', 'PEP', 'WMT']
-
-# ALL_QUANDL_CODES = ['AAPL', 'MSFT', 'PEP', 'WMT']
 
 # QUANDL_TICKERS = ['BTC', 'ETH', 'BNB', 'XRP', 'ADA', 'APT', 'SOL', 'MATIC', 'DOGE',
 #        'STETH', 'OKB', 'OP', 'LINK', 'AVAX', 'DOT', 'LTC', 'WETH', 'SHIB',
@@ -669,20 +666,22 @@ FEATURES_QUANDL_FILE_PATH_DEFAULT = FEATURES_QUANDL_FILE_PATH(CPD_DEFAULT_LBW)
 #   'CBOE': 'Financials',
 #   'TSLA': 'Consumer Discretionary'}
 
-QUANDL_TICKERS = [
-    "EUREX_FDAX", 
-    "LIFFE_FCE",
-    "CME_ND",
-    "CME_NQ",
-    "CME_SP",
-    "CME_ES",
-    "CME_MD",
-    "ICE_TF",
-    "HKEX_HSI",
-    "LIFFE_Z",
-    "EUREX_FESX",
-    "OSE_DJIA"
-]
+# QUANDL_TICKERS = [
+#     "EUREX_FDAX", 
+#     "LIFFE_FCE",
+#     "CME_ND",
+#     "CME_NQ",
+#     "CME_SP",
+#     "CME_ES",
+#     "CME_MD",
+#     "ICE_TF",
+#     "HKEX_HSI",
+#     "LIFFE_Z",
+#     "EUREX_FESX",
+#     "OSE_DJIA"
+# ]
+
+QUANDL_TICKERS = ["AEX", "CAC40", "DAX", "DJIA", "FTSE MIB", "FTSE100", "HANG SENG", "IBEX", "NASDAQ", "SMI", "SP500", "SPI200", "TOPIX"]
 
 ALL_QUANDL_CODES = QUANDL_TICKERS
 
