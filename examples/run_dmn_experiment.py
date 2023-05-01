@@ -11,12 +11,12 @@ from functools import reduce
 
 # define the asset class of each ticker here - for this example we have not done this
 TEST_MODE = False
-ASSET_CLASS_MAPPING = INDUSTRY_MAPPING
+ASSET_CLASS_MAPPING = dict(zip(QUANDL_TICKERS, ["EQ"] * len(QUANDL_TICKERS)))
 TRAIN_VALID_RATIO = 0.90
 TIME_FEATURES = False
 FORCE_OUTPUT_SHARPE_LENGTH = None
 EVALUATE_DIVERSIFIED_VAL_SHARPE = True
-NAME = "experiment_all_industries"
+NAME = "experiment_equity_indices"
 
 
 def main(
