@@ -3,7 +3,7 @@ import argparse
 from settings.hp_grid import HP_MINIBATCH_SIZE
 import pandas as pd
 from settings.default import QUANDL_TICKERS
-from settings.default import INDUSTRY_MAPPING
+# from settings.default import INDUSTRY_MAPPING
 from settings.fixed_params import MODLE_PARAMS
 from mom_trans.backtest import run_all_windows
 import numpy as np
