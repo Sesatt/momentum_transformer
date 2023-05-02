@@ -73,7 +73,7 @@ class ModelFeatures:
         total_time_steps,
         start_boundary=1990,
         test_boundary=2020,
-        test_end=2021,
+        test_end=2023,
         changepoint_lbws=None,
         train_valid_sliding=False,
         # add_buffer_years_to_test=1,  # TODO FIX THIS!!!!
