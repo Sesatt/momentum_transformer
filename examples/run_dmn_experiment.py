@@ -3,7 +3,7 @@ import argparse
 from settings.hp_grid import HP_MINIBATCH_SIZE
 import pandas as pd
 from settings.default import QUANDL_TICKERS
-# from settings.default import INDUSTRY_MAPPING
+from settings.default import INDUSTRY_MAPPING
 from settings.fixed_params import MODLE_PARAMS
 from mom_trans.backtest import run_all_windows
 import numpy as np
@@ -11,12 +11,13 @@ from functools import reduce
 
 # define the asset class of each ticker here - for this example we have not done this
 TEST_MODE = False
-ASSET_CLASS_MAPPING = dict(zip(QUANDL_TICKERS, ["EQ"] * len(QUANDL_TICKERS)))
+# ASSET_CLASS_MAPPING = dict(zip(QUANDL_TICKERS, ["EQ"] * len(QUANDL_TICKERS)))
+ASSET_CLASS_MAPPING = INDUSTRY_MAPPING
 TRAIN_VALID_RATIO = 0.90
 TIME_FEATURES = False
 FORCE_OUTPUT_SHARPE_LENGTH = None
 EVALUATE_DIVERSIFIED_VAL_SHARPE = True
-NAME = "experiment_equity_indices"
+NAME = "experiment_all_industries"
 
 
 def main(
