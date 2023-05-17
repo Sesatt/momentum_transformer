@@ -399,6 +399,7 @@ def run_single_window(
 
     raw_data = pd.read_csv(features_file_path, index_col=0, parse_dates=True)
     raw_data["date"] = raw_data["date"].astype("datetime64[ns]")
+    raw_data["ticker"] = raw_data["ticker"].astype('str')
 
     # TODO more/less than the one year test buffer
     model_features = ModelFeatures(
