@@ -175,6 +175,7 @@ class ModelFeatures:
                 (f"static_ticker", DataTypes.CATEGORICAL, InputTypes.STATIC_INPUT)
             )
             df["static_ticker"] = df["ticker"]
+            df["static_ticker"] = df["static_ticker"].astype('str')
             if static_ticker_type_feature:
                 df["static_ticker_type"] = df["ticker"].map(
                     lambda t: asset_class_dictionary[t]
