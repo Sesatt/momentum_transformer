@@ -94,12 +94,21 @@ class ModelFeatures:
             ("target_returns", DataTypes.REAL_VALUED, InputTypes.TARGET),
             ("norm_daily_return", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
             ("norm_monthly_return", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
-            ("norm_quarterly_return", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
+#             ("norm_quarterly_return", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
             ("norm_biannual_return", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
             ("norm_annual_return", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
             ("macd_8_24", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
             ("macd_16_48", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
             ("macd_32_96", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
+            ("daily_vol", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
+            ("vol", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
+            ("turn", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
+            ("dolvol", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
+            ("ill", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
+            ("baspread", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
+            ("ep", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
+            ("sp", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
+            ("bm", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
         ]
         df = df.dropna()
         df = df[df["year"] >= start_boundary].copy()
