@@ -186,7 +186,8 @@ def save_results(
         results_sw["asset_class"] = results_sw["identifier"].map(
             lambda i: asset_class_dictionary[i]
         )
-        classes = _get_asset_classes(asset_class_dictionary)
+#         classes = _get_asset_classes(asset_class_dictionary)
+        classes = np.unique(list(results_sw.asset_class)).tolist()
         for ac in classes:
             results_asset_class += [results_sw[results_sw["asset_class"] == ac]]
         asset_classes += classes
