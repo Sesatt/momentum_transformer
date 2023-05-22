@@ -151,7 +151,7 @@ def _captured_returns_from_all_windows(
             if filter_identifiers:
                 filter = pd.DataFrame({"identifier": filter_identifiers})
                 filter.identifier = filter.identifier.astype('str') #NEW
-                df.identifier = df.identifier.astype('str) # NEW
+                df.identifier = df.identifier.astype('str') # NEW
                 df = df.merge(filter, on="identifier")
             num_identifiers = len(df["identifier"].unique())
             srs = df.groupby("time")[captured_returns_col].sum() / num_identifiers
