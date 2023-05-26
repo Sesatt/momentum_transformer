@@ -87,7 +87,7 @@ def main(
 
         intervals = [
             (train_start, y, y + test_window_size)
-            for y in range(test_start, test_end - 1, 5)
+            for y in range(test_start, test_end - 1, 3)
         ]
 
         params = MODLE_PARAMS.copy()
@@ -162,7 +162,7 @@ if __name__ == "__main__":
             metavar="t",
             type=int,
             nargs="?",
-            default=1995,
+            default=2005,
             help="Training end year and test start year.",
         )
         parser.add_argument(
@@ -178,7 +178,7 @@ if __name__ == "__main__":
             metavar="w",
             type=int,
             nargs="?",
-            default=5,
+            default=4,
             help="Test window length in years.",
         )
         parser.add_argument(
