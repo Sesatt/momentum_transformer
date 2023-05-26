@@ -272,7 +272,7 @@ def aggregate_and_save_all_windows(
 
     if asset_class_dictionary:
         asset_classes = ["ALL"] + _get_asset_classes(asset_class_dictionary)
-        asset_classes.remove("Other")
+#         asset_classes.remove("Other")
         asset_class_tickers = (
         pd.DataFrame.from_dict(asset_class_dictionary, orient="index")
         .reset_index()
