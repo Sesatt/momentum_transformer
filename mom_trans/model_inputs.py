@@ -91,8 +91,7 @@ class ModelFeatures:
         self._column_definition = [
             ("ticker", DataTypes.CATEGORICAL, InputTypes.ID),
             ("date", DataTypes.DATE, InputTypes.TIME),
-            ("target_dir", DataTypes.REAL_VALUED, InputTypes.TARGET),
-#             ("target_returns", DataTypes.REAL_VALUED, InputTypes.TARGET),
+            ("target_returns", DataTypes.REAL_VALUED, InputTypes.TARGET),
 #             ("norm_daily_return", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
 #             ("norm_monthly_return", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
 # #             ("norm_quarterly_return", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
