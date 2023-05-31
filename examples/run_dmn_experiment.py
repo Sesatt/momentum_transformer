@@ -17,7 +17,7 @@ TRAIN_VALID_RATIO = 0.90
 TIME_FEATURES = False
 FORCE_OUTPUT_SHARPE_LENGTH = None
 EVALUATE_DIVERSIFIED_VAL_SHARPE = True
-NAME = "experiment_sp500_v2"
+NAME = "experiment_sp500_CSM"
 
 
 def main(
@@ -86,8 +86,8 @@ def main(
         PROJECT_NAME = _project_name + str(v)
 
         intervals = [
-            (train_start, y, y + test_window_size)
-            for y in range(test_start, test_end - 1, 2)
+            (train_start + test_window_size, y, y + test_window_size)
+            for y in range(test_start, test_end - 1, 5)
         ]
 
         params = MODLE_PARAMS.copy()
@@ -162,7 +162,7 @@ if __name__ == "__main__":
             metavar="t",
             type=int,
             nargs="?",
-            default=2010,
+            default=2005,
             help="Training end year and test start year.",
         )
         parser.add_argument(
@@ -178,7 +178,7 @@ if __name__ == "__main__":
             metavar="w",
             type=int,
             nargs="?",
-            default=2,
+            default=5,
             help="Test window length in years.",
         )
         parser.add_argument(
