@@ -97,7 +97,7 @@ class ModelFeatures:
 # #             ("norm_quarterly_return", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
 #             ("norm_biannual_return", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
 #             ("norm_annual_return", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
-#             ("daily_return", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
+            ("daily_return", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
             ("monthly_return", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
             ("quarterly_return", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
             ("biannual_return", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
