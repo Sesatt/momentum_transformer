@@ -8,7 +8,7 @@ MODLE_PARAMS = {
     "split_tickers_individually": False,
     "random_search_iterations": 30 ,
     "evaluate_diversified_val_sharpe": True,
-    "train_valid_ratio": 0.90,
+    "train_valid_ratio": 0.70,
     "time_features": False,
     "force_output_sharpe_length": 0,
 }
