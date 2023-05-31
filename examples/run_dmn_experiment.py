@@ -110,7 +110,7 @@ def main(
         else:
             features_file_path = os.path.join(
                 "data",
-                "quandl_cpd_nonelbw.csv",
+                "quandl_cpd_nonelbw_momentum_scaled.csv",
             )
 
         run_all_windows(
