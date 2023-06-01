@@ -136,7 +136,7 @@ if __name__ == "__main__":
             metavar="c",
             type=str,
             nargs="?",
-            default="TFT-CPD-126-21",
+            default="LSTM",
             choices=[
                 "LSTM",
                 "LSTM-CPD-21",
