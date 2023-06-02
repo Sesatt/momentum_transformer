@@ -461,6 +461,13 @@ def run_single_window(
 
     with open(os.path.join(directory, "best_hyperparameters.json"), "w") as file:
         file.write(json.dumps(best_hp))
+    
+    best_directory = os.path.join(directory, "best")
+    # best_model.save_weights(os.path.join(best_directory, "checkpoints", "checkpoint"))
+    best_model.save_weights(os.path.join(best_directory, "checkpoint"))
+    with open(os.path.join(best_directory, "hyperparameters.json"), "w") as file:
+        file.write(json.dumps(best_hp, indent=4))
+    shutil.rmtree(hp_directory)
 
     # if predict_on_test_set:
     print("Predicting on test set...")
@@ -530,12 +537,12 @@ def run_single_window(
 #         file.write(json.dumps(attention_weights, indent = 4))
         
     # save model and get rid of the hp dir
-    best_directory = os.path.join(directory, "best")
-    # best_model.save_weights(os.path.join(best_directory, "checkpoints", "checkpoint"))
-    best_model.save_weights(os.path.join(best_directory, "checkpoint"))
-    with open(os.path.join(best_directory, "hyperparameters.json"), "w") as file:
-        file.write(json.dumps(best_hp, indent=4))
-    shutil.rmtree(hp_directory)
+    # best_directory = os.path.join(directory, "best")
+    # # best_model.save_weights(os.path.join(best_directory, "checkpoints", "checkpoint"))
+    # best_model.save_weights(os.path.join(best_directory, "checkpoint"))
+    # with open(os.path.join(best_directory, "hyperparameters.json"), "w") as file:
+    #     file.write(json.dumps(best_hp, indent=4))
+    # shutil.rmtree(hp_directory)
 
     save_results(
         results_sw,
