@@ -79,7 +79,7 @@ class ModelFeatures:
         # add_buffer_years_to_test=1,  # TODO FIX THIS!!!!
         transform_real_inputs=False,  # TODO remove this
         train_valid_ratio=0.9,
-        split_tickers_individually=False,
+        split_tickers_individually=True,
         add_ticker_as_static=True,
         time_features=False,
         lags=None,
@@ -99,8 +99,8 @@ class ModelFeatures:
 #             ("norm_annual_return", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
             ("daily_return", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
             ("monthly_return", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
-            ("quarterly_return", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
-            ("biannual_return", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
+            # ("quarterly_return", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
+            # ("biannual_return", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
             ("annual_return", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
             ("3y_return", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
             ("macd_8_24", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
