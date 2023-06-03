@@ -336,6 +336,7 @@ def aggregate_and_save_all_windows(
                     ].tolist()
                 ),
                 captured_returns_col=f"captured_returns{suffix}",
+                standard_window_size = standard_window_size
             )
             yrs = pd.to_datetime(all_captured_returns.index).year
             for interval in train_intervals:
