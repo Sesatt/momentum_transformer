@@ -17,7 +17,7 @@ TRAIN_VALID_RATIO = 0.90
 TIME_FEATURES = False
 FORCE_OUTPUT_SHARPE_LENGTH = None
 EVALUATE_DIVERSIFIED_VAL_SHARPE = True
-NAME = "experiment_sp500_technical"
+NAME = "experiment_sp500_momentum"
 
 
 def main(
@@ -46,7 +46,7 @@ def main(
         changepoint_lbws = None
     elif experiment == "TFT-CPD-126-21":
         architecture = "TFT"
-        lstm_time_steps = 252
+        lstm_time_steps = 12
         changepoint_lbws = [126, 21]
     elif experiment == "TFT-SHORT":
         architecture = "TFT"
@@ -110,7 +110,7 @@ def main(
         else:
             features_file_path = os.path.join(
                 "data",
-                "quandl_cpd_nonelbw_technical.csv",
+                "quandl_cpd_nonelbw_monthly.csv",
             )
 
         run_all_windows(
@@ -162,7 +162,7 @@ if __name__ == "__main__":
             metavar="t",
             type=int,
             nargs="?",
-            default=2010,
+            default=2005,
             help="Training end year and test start year.",
         )
         parser.add_argument(
@@ -178,7 +178,7 @@ if __name__ == "__main__":
             metavar="w",
             type=int,
             nargs="?",
-            default=2,
+            default=5,
             help="Test window length in years.",
         )
         parser.add_argument(
