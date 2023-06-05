@@ -537,7 +537,7 @@ class LstmDeepMomentumNetworkModel(DeepMomentumNetworkModel):
         output = tf.keras.layers.TimeDistributed(
             tf.keras.layers.Dense(
                 self.output_size,
-                activation=tf.nn.tanh,
+                activation=tf.nn.softmax,
                 kernel_constraint=keras.constraints.max_norm(3),
             )
         )(dropout[..., :, :])
@@ -546,10 +546,10 @@ class LstmDeepMomentumNetworkModel(DeepMomentumNetworkModel):
 
         adam = keras.optimizers.Adam(lr=learning_rate, clipnorm=max_gradient_norm)
 
-        sharpe_loss = SharpeLoss(self.output_size).call
+        # sharpe_loss = SharpeLoss(self.output_size).call
 
         model.compile(
-            loss=sharpe_loss,
+            loss= tf.keras.losses.BinaryCrossentropy(from_logits=False),
             optimizer=adam,
             sample_weight_mode="temporal",
         )
