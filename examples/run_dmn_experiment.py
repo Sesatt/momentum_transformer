@@ -17,7 +17,7 @@ TRAIN_VALID_RATIO = 0.90
 TIME_FEATURES = False
 FORCE_OUTPUT_SHARPE_LENGTH = None
 EVALUATE_DIVERSIFIED_VAL_SHARPE = True
-NAME = "experiment_sp500_v2"
+NAME = "experiment_sp500_filtered"
 
 
 def main(
@@ -110,7 +110,7 @@ def main(
         else:
             features_file_path = os.path.join(
                 "data",
-                "quandl_cpd_nonelbw.csv",
+                "quandl_cpd_nonelbw_filtered.csv",
             )
 
         run_all_windows(
