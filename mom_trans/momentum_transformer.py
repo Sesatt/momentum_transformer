@@ -636,7 +636,7 @@ class TftDeepMomentumNetworkModel(DeepMomentumNetworkModel):
 
         # sharpe_loss = SharpeLoss(self.output_size).call
 
-        model.compile(loss=tf.keras.losses.BinaryCrossentropy(from_logits=False), optimizer=adam, sample_weight_mode="temporal")
+        model.compile(loss=tf.keras.losses.BinaryCrossentropy(from_logits=False), optimizer=adam, sample_weight_mode="temporal", metrics = ["accuracy"])
 
         self._input_placeholder = all_inputs
 
