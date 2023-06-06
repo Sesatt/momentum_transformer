@@ -446,6 +446,20 @@ def run_single_window(
                 "num_heads": 4,  # TODO to fixed params
             },
         )
+    elif params["architecture"] == "Transformer":
+        dmn = TransformerDeepMomentumNetworkModel(
+            experiment_name,
+            hp_directory,
+            hp_minibatch_size,
+            **params,
+            **model_features.input_params,
+            **{
+                "column_definition": model_features.get_column_definition(),
+                "num_encoder_steps": 0,  # TODO artefact
+                "stack_size": 1,
+                "num_heads": 4,  # TODO to fixed params
+            },
+        )
     else:
         dmn = None
         raise Exception(f"{params['architecture']} is not a valid architecture.")
@@ -554,7 +568,7 @@ def run_single_window(
         {
             "performance_sw": performance_sw,
             "performance_fw": performance_fw,
-            "val_loss": val_loss,
+            "val_accuracy": val_loss,
         },
     )
 

@@ -554,3 +554,163 @@ class LstmDeepMomentumNetworkModel(DeepMomentumNetworkModel):
             sample_weight_mode="temporal",
         )
         return model
+
+class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
+    def __init__(self, project_name, hp_directory, hp_minibatch_size=[512, 1024], **params):
+        params = params.copy()
+
+        self.category_counts = params["category_counts"]
+        
+        super().__init__(project_name, hp_directory, hp_minibatch_size, **params)
+        
+    # def AssetEmbedding(self, all_inputs, d_model):
+    #     time_steps = self.time_steps
+
+    #     num_categorical_variables = len(self.category_counts)
+    #     num_regular_variables = self.input_size - num_categorical_variables
+
+    #     embedding_sizes = [d_model for _, _ in enumerate(self.category_counts)]
+
+    #     embeddings = []
+    #     for i in range(num_categorical_variables):
+
+    #         embedding = keras.Sequential(
+    #             [keras.layers.InputLayer([time_steps]),
+    #                 keras.layers.Embedding(
+    #                     self.category_counts[i],
+    #                     embedding_sizes[i],
+    #                     input_length=time_steps,
+    #                     dtype=tf.float32,
+    #                 ),])
+    #         embeddings.append(embedding)
+
+    #     categorical_inputs = all_inputs[:, :, num_regular_variables:]
+
+    #     embedded_inputs = [
+    #         embeddings[i](categorical_inputs[Ellipsis, i])
+    #         for i in range(num_categorical_variables)
+    #     ]
+
+    #     static_inputs = [embedded_inputs[i][:, 0, :]
+    #      for i in range(num_categorical_variables)]
+    #     static_inputs = keras.backend.stack(static_inputs, axis = 1)
+
+    #     return static_inputs
+    
+    def model_builder(self, hp):
+        hidden_layer_size = hp.Choice("hidden_layer_size", values=HP_HIDDEN_LAYER_SIZE)
+        dropout_rate = hp.Choice("dropout_rate", values=HP_DROPOUT_RATE)
+        max_gradient_norm = hp.Choice("max_gradient_norm", values=[10e-3, 10e-2 , 10e-1])
+        learning_rate = hp.Choice("learning_rate", values=[10e-3, 10e-4])
+        # minibatch_size = hp.Choice("hidden_layer_size", [512, 1024])
+        no_heads = hp.Choice("no_heads", values = [2,4])
+        no_layers = hp.Choice("no_layers", values = [1,2,3])
+
+        d_q = hp.Choice("dq", values = [ 8, 16, 32, 64])
+        # dq_dattn = hp.Choice("dq_dattn", values = [ 1, 2, 4, 8])
+
+        d_k = d_v = embedding_size // no_heads
+
+        inputs = keras.Input(shape = (self.time_steps, self.input_size))
+
+        # x = tf.keras.layers.Dense(d_q)(inputs)
+        # pos_enc = Time2Vector(self.time_steps, d_q)(inputs)
+        # x = x + pos_enc
+
+        # asset_emb = AssetEmbedding(output_size, d_q)
+        # x = x + asset_emb
+
+        def transformer_encoder(inputs, head_size, num_heads, ff_dim, dropout=0):
+            # Normalization and Attention
+            x = tf.keras.layers.LayerNormalization(epsilon=1e-6)(inputs)
+            x = tf.keras.layers.MultiHeadAttention(key_dim=head_size, num_heads=num_heads, dropout=dropout)(x, x)
+            x = tf.keras.layers.Dropout(dropout)(x)
+            res = x + inputs
+
+            # Feed Forward Part
+            x = tf.keras.layers.LayerNormalization(epsilon=1e-6)(res)
+            x = tf.keras.layers.Conv1D(filters=ff_dim, kernel_size=1, activation="relu")(x)
+            x = tf.keras.layers.Dropout(dropout)(x)
+            x = tf.keras.layers.Conv1D(filters=inputs.shape[-1], kernel_size=1)(x)
+            
+            out = x + res
+            x = tf.keras.layers.LayerNormalization(epsilon=1e-6)(out)
+            return x
+
+        for _ in range(no_layers):
+            x = transformer_encoder(x, dq, no_heads, ff_dim, dropout_rate)
+        
+        x = tf.keras.layers.GlobalAveragePooling1D(data_format="channels_first")(x)
+        for dim in mlp_units:
+            x = tf.keras.layers.Dense(dim, activation="relu")(x)
+            x = tf.keras.layers.Dropout(dropout_rate)(x)
+        
+        outputs = tf.keras.layers.TimeDistributed(
+            tf.keras.layers.Dense(
+                self.output_size, 
+                activation = tf.nn.tanh,
+                kernel_constraint = keras.constraints.max_norm(3),
+                )
+        )(x)  # (batch_size, output_size)
+
+        model = keras.Model(inputs= inputs, outputs=outputs)
+
+        adam = keras.optimizers.Adam(lr=learning_rate, clipnorm=max_gradient_norm)
+
+        sharpe_loss = SharpeLoss(self.output_size).call
+
+        model.compile(
+            loss=sharpe_loss,
+            optimizer=adam,
+            sample_weight_mode="temporal",
+        )
+        return model
+
+class Time2Vector(tf.keras.layers.Layer):
+  def __init__(self, seq_len, model_dim, **kwargs):
+    super(Time2Vector, self).__init__()
+    self.seq_len = seq_len
+    self.output_dim = model_dim
+
+  def build(self, input_shape):
+    '''Initialize weights and biases with shape (batch, seq_len)'''
+    self.weights_linear = self.add_weight(name='weight_linear',
+                                shape=(1, int(self.seq_len), 1),
+                                initializer='uniform',
+                                trainable=True)
+    
+    self.bias_linear = self.add_weight(name='bias_linear',
+                                shape=(1, int(self.seq_len),1),
+                                initializer='uniform',
+                                trainable=True)
+    
+    self.weights_periodic = self.add_weight(name='weight_periodic',
+                                shape=(1, int(self.seq_len),self.output_dim),
+                                initializer='uniform',
+                                trainable=True)
+
+    self.bias_periodic = self.add_weight(name='bias_periodic',
+                                shape=(1, int(self.seq_len),self.output_dim),
+                                initializer='uniform',
+                                trainable=True)
+    
+    super(Time2Vector, self).build(self.seq_len)
+
+  def call(self, x):
+    '''Calculate linear and periodic time features'''
+    # x = tf.math.reduce_mean(x[:,:,:4], axis=-1)
+    x = tf.expand_dims(x, axis = -1) 
+    time_linear = self.weights_linear * x + self.bias_linear # Linear time feature
+    # time_linear = tf.expand_dims(time_linear, axis=-1) # Add dimension (batch, seq_len, 1)
+    
+    time_periodic = tf.math.sin(tf.multiply(x, self.weights_periodic) + self.bias_periodic)
+    # time_periodic = tf.expand_dims(time_periodic, axis=-1) # Add dimension (batch, seq_len, 1)
+    return tf.concat([time_linear, time_periodic], axis=-1) # shape = (batch, seq_len, 2)
+
+  def get_config(self): # Needed for saving and loading model with custom layer
+    config = super().get_config().copy()
+    config.update({'seq_len': self.seq_len})
+    return config
+  
+  def compute_output_shape(self, input_shape): 
+    return (input_shape[0], input_shape[1], self.output_dim)
