@@ -17,7 +17,7 @@ TRAIN_VALID_RATIO = 0.90
 TIME_FEATURES = False
 FORCE_OUTPUT_SHARPE_LENGTH = None
 EVALUATE_DIVERSIFIED_VAL_SHARPE = True
-NAME = "experiment_sp500_filtered"
+NAME = "experiment_sp500_tsmom"
 
 
 def main(
@@ -58,6 +58,10 @@ def main(
         changepoint_lbws = [21]
     elif experiment == "TFT-SHORT-CPD-63":
         architecture = "TFT"
+        lstm_time_steps = 63
+        changepoint_lbws = [63]
+    elif experiment == "Transformer":
+        architecture = "Transformer"
         lstm_time_steps = 63
         changepoint_lbws = [63]
     else:
@@ -110,7 +114,7 @@ def main(
         else:
             features_file_path = os.path.join(
                 "data",
-                "quandl_cpd_nonelbw_filtered.csv",
+                "quandl_cpd_nonelbw_tsmom.csv",
             )
 
         run_all_windows(
