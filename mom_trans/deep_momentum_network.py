@@ -556,7 +556,7 @@ class LstmDeepMomentumNetworkModel(DeepMomentumNetworkModel):
         return model
 
 class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
-    def __init__(self, project_name, hp_directory, hp_minibatch_size=[512, 1024], **params):
+    def __init__(self, project_name, hp_directory, hp_minibatch_size = HP_MINIBATCH_SIZE, **params):
         params = params.copy()
         self.category_counts = params["category_counts"]
         
