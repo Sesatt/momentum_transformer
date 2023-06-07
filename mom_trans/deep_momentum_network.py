@@ -556,12 +556,17 @@ class LstmDeepMomentumNetworkModel(DeepMomentumNetworkModel):
         return model
 
 class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
-    def __init__(self, project_name, hp_directory, hp_minibatch_size = HP_MINIBATCH_SIZE, **params):
-        params = params.copy()
-        self.category_counts = params["category_counts"]
+    # def __init__(self, project_name, hp_directory, hp_minibatch_size = HP_MINIBATCH_SIZE, **params):
+    #     params = params.copy()
+    #     self.category_counts = params["category_counts"]
         
-        super().__init__(project_name, hp_directory, hp_minibatch_size, **params)
+    #     super().__init__(project_name, hp_directory, hp_minibatch_size, **params)
     
+    def __init__(
+        self, project_name, hp_directory, hp_minibatch_size=HP_MINIBATCH_SIZE, **params
+    ):
+        super().__init__(project_name, hp_directory, hp_minibatch_size, **params)
+
     def model_builder(self, hp):
         hidden_layer_size = hp.Choice("hidden_layer_size", values=HP_HIDDEN_LAYER_SIZE)
         dropout_rate = hp.Choice("dropout_rate", values=HP_DROPOUT_RATE)
