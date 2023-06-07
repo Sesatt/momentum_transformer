@@ -595,7 +595,7 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
         return static_inputs[0], static_inputs[1] 
     
     def PositionEncoding(seq_len, output_dim, n=10000):
-        P = np.zeros((seq_len, output_dim))
+        P = np.zeros((int(seq_len), int(output_dim)))
         for k in range(seq_len):
             for i in np.arange(int(output_dim/2)):
                 denominator = np.power(n, 2*i/output_dim)
