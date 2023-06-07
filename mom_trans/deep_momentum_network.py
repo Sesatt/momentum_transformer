@@ -588,10 +588,10 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
         ticker_enc, class_enc = self.AssetEmbedding(inputs, d_q)
         x = x + pos_enc + ticker_enc + class_enc
 
-        def transformer_encoder(inputs, head_size, num_heads, ff_dim, dropout=0):
+        def transformer_encoder(inputs, key_dim, num_heads, ff_dim, dropout=0):
             # Normalization and Attention
             x = tf.keras.layers.LayerNormalization(epsilon=1e-6)(inputs)
-            x = tf.keras.layers.MultiHeadAttention(key_dim=head_size, num_heads=num_heads, dropout=dropout)(x, x)
+            x = tf.keras.layers.MultiHeadAttention(key_dim=key_dim, num_heads=num_heads, dropout=dropout)(x, x)
             x = tf.keras.layers.Dropout(dropout)(x)
             res = x + inputs
 
