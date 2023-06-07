@@ -558,7 +558,6 @@ class LstmDeepMomentumNetworkModel(DeepMomentumNetworkModel):
 class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
     def __init__(self, project_name, hp_directory, hp_minibatch_size=[512, 1024], **params):
         params = params.copy()
-
         self.category_counts = params["category_counts"]
         
         super().__init__(project_name, hp_directory, hp_minibatch_size, **params)
@@ -583,11 +582,11 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
 
         inputs = keras.Input(shape = (time_steps, self.input_size))
 
-        x = tf.keras.layers.Dense(d_q)(inputs)
-        pos_enc = self.PositionEncoding(d_q)(inputs)
+        # x = tf.keras.layers.Dense(d_q)(inputs)
+        # pos_enc = self.PositionEncoding(d_q)(inputs)
 
-        ticker_enc, class_enc = self.AssetEmbedding(inputs, d_q)
-        x = x + pos_enc + ticker_enc + class_enc
+        # ticker_enc, class_enc = self.AssetEmbedding(inputs, d_q)
+        # x = x + pos_enc + ticker_enc + class_enc
 
         def transformer_encoder(inputs, head_size, num_heads, ff_dim, dropout=0):
             # Normalization and Attention
