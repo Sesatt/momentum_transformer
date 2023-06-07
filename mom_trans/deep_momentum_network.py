@@ -583,7 +583,7 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
         inputs = keras.Input(shape = (time_steps, self.input_size))
 
         x = tf.keras.layers.Dense(d_q)(inputs)
-        pos_enc = self.PositionEncoding(d_q)(inputs)
+        pos_enc = self.PositionEncoding(d_q)
 
         ticker_enc, class_enc = self.AssetEmbedding(inputs, d_q)
         x = x + pos_enc + ticker_enc + class_enc
