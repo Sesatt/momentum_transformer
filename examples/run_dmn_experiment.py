@@ -62,8 +62,8 @@ def main(
         changepoint_lbws = [63]
     elif experiment == "Transformer":
         architecture = "Transformer"
-        lstm_time_steps = 63
-        changepoint_lbws = [63]
+        lstm_time_steps = 252
+        changepoint_lbws = None
     else:
         raise BaseException("Invalid experiment.")
 
