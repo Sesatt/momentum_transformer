@@ -507,7 +507,7 @@ class DeepMomentumNetworkModel(ABC):
         return results, performance
 
 
-class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
+class LstmDeepMomentumNetworkModel(DeepMomentumNetworkModel):
     def __init__(
         self, project_name, hp_directory, hp_minibatch_size=HP_MINIBATCH_SIZE, **params
     ):
@@ -554,3 +554,218 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
             sample_weight_mode="temporal",
         )
         return model
+
+class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
+    # def __init__(self, project_name, hp_directory, hp_minibatch_size = HP_MINIBATCH_SIZE, **params):
+    #     params = params.copy()
+    #     self.category_counts = params["category_counts"]
+        
+    #     super().__init__(project_name, hp_directory, hp_minibatch_size, **params)
+    
+    def __init__(
+        self, project_name, hp_directory, hp_minibatch_size=HP_MINIBATCH_SIZE, **params
+    ):
+        super().__init__(project_name, hp_directory, hp_minibatch_size, **params)
+
+    def model_builder(self, hp):
+        hidden_layer_size = hp.Choice("hidden_layer_size", values=HP_HIDDEN_LAYER_SIZE)
+        dropout_rate = hp.Choice("dropout_rate", values=HP_DROPOUT_RATE)
+        max_gradient_norm = hp.Choice("max_gradient_norm", values=HP_MAX_GRADIENT_NORM)
+        learning_rate = hp.Choice("learning_rate", values=HP_LEARNING_RATE)
+        # minibatch_size = hp.Choice("hidden_layer_size", HP_MINIBATCH_SIZE)
+
+        input = keras.Input((self.time_steps, self.input_size))
+        lstm = tf.keras.layers.LSTM(
+            hidden_layer_size,
+            return_sequences=True,
+            dropout=dropout_rate,
+            stateful=False,
+            activation="tanh",
+            recurrent_activation="sigmoid",
+            recurrent_dropout=0,
+            unroll=False,
+            use_bias=True,
+        )(input)
+        dropout = keras.layers.Dropout(dropout_rate)(lstm)
+
+        output = tf.keras.layers.TimeDistributed(
+            tf.keras.layers.Dense(
+                self.output_size,
+                activation=tf.nn.tanh,
+                kernel_constraint=keras.constraints.max_norm(3),
+            )
+        )(dropout[..., :, :])
+
+        model = keras.Model(inputs=input, outputs=output)
+
+        adam = keras.optimizers.Adam(lr=learning_rate, clipnorm=max_gradient_norm)
+
+        sharpe_loss = SharpeLoss(self.output_size).call
+
+        model.compile(
+            loss=sharpe_loss,
+            optimizer=adam,
+            sample_weight_mode="temporal",
+        )
+        return model
+    
+        # # hidden_layer_size = hp.Choice("hidden_layer_size", values=HP_HIDDEN_LAYER_SIZE)
+        # dropout_rate = hp.Choice("dropout_rate", values=HP_DROPOUT_RATE)
+        # max_gradient_norm = hp.Choice("max_gradient_norm", values=[10e-3, 10e-2 , 10e-1])
+        # learning_rate = hp.Choice("learning_rate", values=[10e-3, 10e-4])
+        # # minibatch_size = hp.Choice("hidden_layer_size", [512, 1024])
+        # no_heads = hp.Choice("no_heads", values = [2,4])
+        # no_layers = hp.Choice("no_layers", values = [1,2,3])
+
+        # d_q = hp.Choice("dq", values = [ 8, 16, 32, 64]) # is d_model
+        # ff_dim = hp.Choice("ff_dim", values = [8, 16, 32, 64])
+        # ff_final_dim = hp.Choice("ff_dim", values = [1, 2, 4, 8])
+
+        # d_k  = d_q // no_heads
+
+        # time_steps = self.time_steps
+        # no_categories = self.category_counts
+
+        # inputs = keras.Input(shape = (time_steps, self.input_size))
+
+        # x = tf.keras.layers.Dense(d_q)(inputs)
+        # pos_enc = self.PositionEncoding(d_q)(inputs)
+
+        # ticker_enc, class_enc = self.AssetEmbedding(inputs, d_q)
+        # x = x + pos_enc + ticker_enc + class_enc
+
+        # def transformer_encoder(inputs, head_size, num_heads, ff_dim, dropout=0):
+        #     # Normalization and Attention
+        #     x = tf.keras.layers.LayerNormalization(epsilon=1e-6)(inputs)
+        #     x = tf.keras.layers.MultiHeadAttention(key_dim=head_size, num_heads=num_heads, dropout=dropout)(x, x)
+        #     x = tf.keras.layers.Dropout(dropout)(x)
+        #     res = x + inputs
+
+        #     # Feed Forward Part
+        #     x = tf.keras.layers.LayerNormalization(epsilon=1e-6)(res)
+        #     x = tf.keras.layers.Conv1D(filters=ff_dim, kernel_size=1, activation="relu")(x)
+        #     x = tf.keras.layers.Dropout(dropout)(x)
+        #     x = tf.keras.layers.Conv1D(filters=inputs.shape[-1], kernel_size=1)(x)
+            
+        #     out = x + res
+        #     x = tf.keras.layers.LayerNormalization(epsilon=1e-6)(out)
+        #     return x
+
+        # for _ in range(no_layers):
+        #     x = transformer_encoder(inputs = x, key_dim = d_k, num_heads = no_heads, ff_dim = ff_dim, dropout = dropout_rate)
+        
+        # x = tf.keras.layers.GlobalAveragePooling1D(data_format="channels_first")(x)
+
+        # x = tf.keras.layers.Dense(ff_final_dim, activation="relu")(x)
+        # x = tf.keras.layers.Dropout(dropout_rate)(x)
+        
+        # outputs = tf.keras.layers.TimeDistributed(
+        #     tf.keras.layers.Dense(
+        #         self.output_size, 
+        #         activation = tf.nn.tanh,
+        #         kernel_constraint = keras.constraints.max_norm(3),
+        #         )
+        # )(x)  # (batch_size, output_size)
+
+        # model = keras.Model(inputs= inputs, outputs=outputs)
+
+        # adam = keras.optimizers.Adam(lr=learning_rate, clipnorm=max_gradient_norm)
+
+        # sharpe_loss = SharpeLoss(self.output_size).call
+
+        # model.compile(
+        #     loss=sharpe_loss,
+        #     optimizer=adam,
+        #     sample_weight_mode="temporal",
+        # )
+        # return model
+    
+    # def AssetEmbedding(self, all_inputs, d_model):
+    #     time_steps = self.time_steps
+    #     no_categories = self.category_counts
+
+    #     num_categorical_variables = len(self.category_counts)
+    #     num_regular_variables = self.input_size - num_categorical_variables
+
+    #     embedding_sizes = [d_model for _, _ in enumerate(self.category_counts)]
+
+    #     embeddings = []
+    #     for i in range(num_categorical_variables):
+
+    #         embedding = keras.Sequential(
+    #             [keras.layers.InputLayer([time_steps]),
+    #                 keras.layers.Embedding(
+    #                     self.category_counts[i],
+    #                     embedding_sizes[i],
+    #                     input_length=time_steps,
+    #                     dtype=tf.float32,
+    #                 ),])
+    #         embeddings.append(embedding)
+    #     categorical_inputs = all_inputs[:, :, num_regular_variables:]
+
+    #     embedded_inputs = [
+    #             embeddings[i](categorical_inputs[Ellipsis, i])
+    #             for i in range(num_categorical_variables)]
+
+    #     static_inputs= [embedded_inputs[i][:, :, :] for i in range(num_categorical_variables)]
+    #     # static_inputs = keras.backend.stack(embedded_inputs, axis = 2)
+    #     return static_inputs[0], static_inputs[1] 
+    
+    # def PositionEncoding(self, output_dim, n=10000):
+    #     # print(type(seq_len), type(output_dim))
+    #     P = np.zeros((self.time_steps, output_dim))
+    #     for k in range(self.time_steps):
+    #         for i in np.arange(int(output_dim/2)):
+    #             denominator = np.power(n, 2*i/output_dim)
+    #             P[k, 2*i] = np.sin(k/denominator)
+    #             P[k, 2*i+1] = np.cos(k/denominator)
+    #     return tf.convert_to_tensor(P, dtype=tf.float32)
+
+class Time2Vector(tf.keras.layers.Layer):
+  def __init__(self, seq_len, model_dim, **kwargs):
+    super(Time2Vector, self).__init__()
+    self.seq_len = seq_len
+    self.output_dim = model_dim
+
+  def build(self, input_shape):
+    '''Initialize weights and biases with shape (batch, seq_len)'''
+    self.weights_linear = self.add_weight(name='weight_linear',
+                                shape=(1, int(self.seq_len), 1),
+                                initializer='uniform',
+                                trainable=True)
+    
+    self.bias_linear = self.add_weight(name='bias_linear',
+                                shape=(1, int(self.seq_len),1),
+                                initializer='uniform',
+                                trainable=True)
+    
+    self.weights_periodic = self.add_weight(name='weight_periodic',
+                                shape=(1, int(self.seq_len),self.output_dim),
+                                initializer='uniform',
+                                trainable=True)
+
+    self.bias_periodic = self.add_weight(name='bias_periodic',
+                                shape=(1, int(self.seq_len),self.output_dim),
+                                initializer='uniform',
+                                trainable=True)
+    
+    super(Time2Vector, self).build(self.seq_len)
+
+  def call(self, x):
+    '''Calculate linear and periodic time features'''
+    # x = tf.math.reduce_mean(x[:,:,:4], axis=-1)
+    x = tf.expand_dims(x, axis = -1) 
+    time_linear = self.weights_linear * x + self.bias_linear # Linear time feature
+    # time_linear = tf.expand_dims(time_linear, axis=-1) # Add dimension (batch, seq_len, 1)
+    
+    time_periodic = tf.math.sin(tf.multiply(x, self.weights_periodic) + self.bias_periodic)
+    # time_periodic = tf.expand_dims(time_periodic, axis=-1) # Add dimension (batch, seq_len, 1)
+    return tf.concat([time_linear, time_periodic], axis=-1) # shape = (batch, seq_len, 2)
+
+  def get_config(self): # Needed for saving and loading model with custom layer
+    config = super().get_config().copy()
+    config.update({'seq_len': self.seq_len})
+    return config
+  
+  def compute_output_shape(self, input_shape): 
+    return (input_shape[0], input_shape[1], self.output_dim)
