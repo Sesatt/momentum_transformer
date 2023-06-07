@@ -573,7 +573,7 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
 
         d_q = hp.Choice("dq", values = [ 8, 16, 32, 64]) # is d_model
         ff_dim = hp.Choice("ff_dim", values = [8, 16, 32, 64])
-        ff_final_dim = hp.Choice("ff_dim", values = [1, 2, 4, 8])
+        ff_final_dim = hp.Choice("ff_final_dim", values = [1, 2, 4, 8])
 
         d_k  = d_q // no_heads
 
@@ -597,7 +597,7 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
 
             # Feed Forward Part
             x = tf.keras.layers.LayerNormalization(epsilon=1e-6)(res)
-            x = tf.keras.layers.Conv1D(filters=ff_dim, kernel_size=1, activation="relu")(x)
+            x = tf.keras.layers.Conv1D(filters=key_dim, kernel_size=1, activation="relu")(x)
             x = tf.keras.layers.Dropout(dropout)(x)
             x = tf.keras.layers.Conv1D(filters=inputs.shape[-1], kernel_size=1)(x)
             
@@ -608,16 +608,17 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
         for _ in range(no_layers):
             x = transformer_encoder(inputs = x, key_dim = d_k, num_heads = no_heads, ff_dim = ff_dim, dropout = dropout_rate)
         
-        x = tf.keras.layers.GlobalAveragePooling1D(data_format="channels_first")(x)
+        # x = tf.keras.layers.GlobalAveragePooling1D(data_format="channels_first")(x)
 
-        x = tf.keras.layers.Dense(ff_final_dim, activation="relu")(x)
-        x = tf.keras.layers.Dropout(dropout_rate)(x)
+        # x = tf.keras.layers.Dense(ff_final_dim, activation="relu")(x)
+        # x = tf.keras.layers.Dropout(dropout_rate)(x)
         
-        outputs = tf.keras.layers.Dense(
+        outputs = keras.layers.TimeDistributed(
+            tf.keras.layers.Dense(
                 self.output_size, 
                 activation = tf.nn.tanh,
                 kernel_constraint = keras.constraints.max_norm(3),
-                )(x)  # (batch_size, output_size)
+                ))(x)  # (batch_size, output_size)
 
         model = keras.Model(inputs= inputs, outputs=outputs)
 
