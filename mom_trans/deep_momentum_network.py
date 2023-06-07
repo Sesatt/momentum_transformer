@@ -563,8 +563,48 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
         
         super().__init__(project_name, hp_directory, hp_minibatch_size, **params)
         
+    def AssetEmbedding(self, all_inputs, d_model):
+        time_steps = self.time_steps
+        no_categories = self.category_counts
+
+        num_categorical_variables = len(self.category_counts)
+        num_regular_variables = self.input_size - num_categorical_variables
+
+        embedding_sizes = [d_model for _, _ in enumerate(self.category_counts)]
+
+        embeddings = []
+        for i in range(num_categorical_variables):
+
+            embedding = keras.Sequential(
+                [keras.layers.InputLayer([time_steps]),
+                    keras.layers.Embedding(
+                        self.category_counts[i],
+                        embedding_sizes[i],
+                        input_length=time_steps,
+                        dtype=tf.float32,
+                    ),])
+            embeddings.append(embedding)
+        categorical_inputs = all_inputs[:, :, num_regular_variables:]
+
+        embedded_inputs = [
+                embeddings[i](categorical_inputs[Ellipsis, i])
+                for i in range(num_categorical_variables)]
+
+        static_inputs= [embedded_inputs[i][:, :, :] for i in range(num_categorical_variables)]
+        # static_inputs = keras.backend.stack(embedded_inputs, axis = 2)
+        return static_inputs[0], static_inputs[1] 
+    
+    def PositionEncoding(seq_len, output_dim, n=10000):
+        P = np.zeros((seq_len, output_dim))
+        for k in range(seq_len):
+            for i in np.arange(int(output_dim/2)):
+                denominator = np.power(n, 2*i/output_dim)
+                P[k, 2*i] = np.sin(k/denominator)
+                P[k, 2*i+1] = np.cos(k/denominator)
+        return tf.convert_to_tensor(P, dtype=tf.float32)
+    
     def model_builder(self, hp):
-        hidden_layer_size = hp.Choice("hidden_layer_size", values=HP_HIDDEN_LAYER_SIZE)
+        # hidden_layer_size = hp.Choice("hidden_layer_size", values=HP_HIDDEN_LAYER_SIZE)
         dropout_rate = hp.Choice("dropout_rate", values=HP_DROPOUT_RATE)
         max_gradient_norm = hp.Choice("max_gradient_norm", values=[10e-3, 10e-2 , 10e-1])
         learning_rate = hp.Choice("learning_rate", values=[10e-3, 10e-4])
@@ -572,19 +612,19 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
         no_heads = hp.Choice("no_heads", values = [2,4])
         no_layers = hp.Choice("no_layers", values = [1,2,3])
 
-        d_q = hp.Choice("dq", values = [ 8, 16, 32, 64])
-        # dq_dattn = hp.Choice("dq_dattn", values = [ 1, 2, 4, 8])
+        d_q = hp.Choice("dq", values = [ 8, 16, 32, 64]) # is d_model
+        ff_dim = hp.Choice("ff_dim", values = [8, 16, 32, 64])
+        ff_final_dim = hp.Choice("ff_dim", values = [1, 2, 4, 8])
 
-        d_k = d_v = embedding_size // no_heads
+        d_k  = d_q // no_heads
 
         inputs = keras.Input(shape = (self.time_steps, self.input_size))
 
         x = tf.keras.layers.Dense(d_q)(inputs)
-        # pos_enc = Time2Vector(self.time_steps, d_q)(inputs)
-        # x = x + pos_enc
+        pos_enc = self.PositionEncoding(self.time_steps, d_q)(inputs)
 
-        # asset_emb = AssetEmbedding(output_size, d_q)
-        # x = x + asset_emb
+        ticker_enc, class_enc = self.AssetEmbedding(inputs, d_q)
+        x = x + pos_enc + ticker_enc + class_enc
 
         def transformer_encoder(inputs, head_size, num_heads, ff_dim, dropout=0):
             # Normalization and Attention
@@ -604,12 +644,12 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
             return x
 
         for _ in range(no_layers):
-            x = transformer_encoder(x, dq, no_heads, ff_dim, dropout_rate)
+            x = transformer_encoder(inputs = x, key_dim = d_k, num_heads = no_heads, ff_dim = ff_dim, dropout = dropout_rate)
         
         x = tf.keras.layers.GlobalAveragePooling1D(data_format="channels_first")(x)
-        for dim in mlp_units:
-            x = tf.keras.layers.Dense(dim, activation="relu")(x)
-            x = tf.keras.layers.Dropout(dropout_rate)(x)
+
+        x = tf.keras.layers.Dense(ff_final_dim, activation="relu")(x)
+        x = tf.keras.layers.Dropout(dropout_rate)(x)
         
         outputs = tf.keras.layers.TimeDistributed(
             tf.keras.layers.Dense(
