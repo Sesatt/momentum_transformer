@@ -563,40 +563,6 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
         
         super().__init__(project_name, hp_directory, hp_minibatch_size, **params)
         
-    # def AssetEmbedding(self, all_inputs, d_model):
-    #     time_steps = self.time_steps
-
-    #     num_categorical_variables = len(self.category_counts)
-    #     num_regular_variables = self.input_size - num_categorical_variables
-
-    #     embedding_sizes = [d_model for _, _ in enumerate(self.category_counts)]
-
-    #     embeddings = []
-    #     for i in range(num_categorical_variables):
-
-    #         embedding = keras.Sequential(
-    #             [keras.layers.InputLayer([time_steps]),
-    #                 keras.layers.Embedding(
-    #                     self.category_counts[i],
-    #                     embedding_sizes[i],
-    #                     input_length=time_steps,
-    #                     dtype=tf.float32,
-    #                 ),])
-    #         embeddings.append(embedding)
-
-    #     categorical_inputs = all_inputs[:, :, num_regular_variables:]
-
-    #     embedded_inputs = [
-    #         embeddings[i](categorical_inputs[Ellipsis, i])
-    #         for i in range(num_categorical_variables)
-    #     ]
-
-    #     static_inputs = [embedded_inputs[i][:, 0, :]
-    #      for i in range(num_categorical_variables)]
-    #     static_inputs = keras.backend.stack(static_inputs, axis = 1)
-
-    #     return static_inputs
-    
     def model_builder(self, hp):
         hidden_layer_size = hp.Choice("hidden_layer_size", values=HP_HIDDEN_LAYER_SIZE)
         dropout_rate = hp.Choice("dropout_rate", values=HP_DROPOUT_RATE)
@@ -613,7 +579,7 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
 
         inputs = keras.Input(shape = (self.time_steps, self.input_size))
 
-        # x = tf.keras.layers.Dense(d_q)(inputs)
+        x = tf.keras.layers.Dense(d_q)(inputs)
         # pos_enc = Time2Vector(self.time_steps, d_q)(inputs)
         # x = x + pos_enc
 
