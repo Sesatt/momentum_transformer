@@ -416,7 +416,7 @@ def run_single_window(
         changepoint_lbws=changepoint_lbws,
         split_tickers_individually=params["split_tickers_individually"],
         train_valid_ratio=params["train_valid_ratio"],
-        add_ticker_as_static=(params["architecture"] == "TFT"),
+        add_ticker_as_static=((params["architecture"] == "TFT") or (params["architecture"] == "Transformer")),
         time_features=params["time_features"],
         lags=params["force_output_sharpe_length"],
         asset_class_dictionary=asset_class_dictionary,
