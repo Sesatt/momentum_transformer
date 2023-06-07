@@ -665,15 +665,15 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
         # static_inputs = keras.backend.stack(embedded_inputs, axis = 2)
         return static_inputs[0], static_inputs[1] 
     
-    def PositionEncoding(self, output_dim, n=10000):
-        # print(type(seq_len), type(output_dim))
-        P = np.zeros((self.time_steps, output_dim))
-        for k in range(self.time_steps):
-            for i in np.arange(int(output_dim/2)):
-                denominator = np.power(n, 2*i/output_dim)
-                P[k, 2*i] = np.sin(k/denominator)
-                P[k, 2*i+1] = np.cos(k/denominator)
-        return tf.convert_to_tensor(P, dtype=tf.float32)
+    # def PositionEncoding(self, output_dim, n=10000):
+    #     # print(type(seq_len), type(output_dim))
+    #     P = np.zeros((self.time_steps, output_dim))
+    #     for k in range(self.time_steps):
+    #         for i in np.arange(int(output_dim/2)):
+    #             denominator = np.power(n, 2*i/output_dim)
+    #             P[k, 2*i] = np.sin(k/denominator)
+    #             P[k, 2*i+1] = np.cos(k/denominator)
+    #     return tf.convert_to_tensor(P, dtype=tf.float32)
 
 class Time2Vector(tf.keras.layers.Layer):
   def __init__(self, seq_len, model_dim, **kwargs):
