@@ -594,10 +594,10 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
         # static_inputs = keras.backend.stack(embedded_inputs, axis = 2)
         return static_inputs[0], static_inputs[1] 
     
-    def PositionEncoding(seq_len, output_dim, n=10000):
-        print(type(seq_len), type(output_dim))
-        P = np.zeros((int(seq_len), int(output_dim)))
-        for k in range(seq_len):
+    def PositionEncoding(self, output_dim, n=10000):
+        # print(type(seq_len), type(output_dim))
+        P = np.zeros((self.time_steps, output_dim))
+        for k in range(self.time_steps):
             for i in np.arange(int(output_dim/2)):
                 denominator = np.power(n, 2*i/output_dim)
                 P[k, 2*i] = np.sin(k/denominator)
@@ -619,10 +619,13 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
 
         d_k  = d_q // no_heads
 
-        inputs = keras.Input(shape = (self.time_steps, self.input_size))
+        time_steps = self.time_steps
+        no_categories = self.category_counts
+
+        inputs = keras.Input(shape = (time_steps, self.input_size))
 
         x = tf.keras.layers.Dense(d_q)(inputs)
-        pos_enc = self.PositionEncoding(self.time_steps, d_q)(inputs)
+        pos_enc = self.PositionEncoding(d_q)(inputs)
 
         ticker_enc, class_enc = self.AssetEmbedding(inputs, d_q)
         x = x + pos_enc + ticker_enc + class_enc
