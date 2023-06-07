@@ -90,7 +90,7 @@ def main(
         PROJECT_NAME = _project_name + str(v)
 
         intervals = [
-            (test_start - 20, y, y + test_window_size)
+            (y-20, y, y + test_window_size)
             for y in range(test_start, test_end - 1, test_window_size)
         ]
 
