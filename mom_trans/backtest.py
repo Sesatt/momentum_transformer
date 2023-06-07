@@ -11,7 +11,7 @@ import copy
 import json
 
 from mom_trans.model_inputs import ModelFeatures
-from mom_trans.deep_momentum_network import LstmDeepMomentumNetworkModel
+from mom_trans.deep_momentum_network import LstmDeepMomentumNetworkModel, TransformerDeepMomentumNetworkModel
 from mom_trans.momentum_transformer import TftDeepMomentumNetworkModel
 from mom_trans.classical_strategies import (
     VOL_TARGET,
@@ -453,12 +453,6 @@ def run_single_window(
             hp_minibatch_size,
             **params,
             **model_features.input_params,
-            **{
-                "column_definition": model_features.get_column_definition(),
-                "num_encoder_steps": 0,  # TODO artefact
-                "stack_size": 1,
-                "num_heads": 4,  # TODO to fixed params
-            },
         )
     else:
         dmn = None
