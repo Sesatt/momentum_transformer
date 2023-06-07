@@ -562,47 +562,6 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
         self.category_counts = params["category_counts"]
         
         super().__init__(project_name, hp_directory, hp_minibatch_size, **params)
-        
-    def AssetEmbedding(self, all_inputs, d_model):
-        time_steps = self.time_steps
-        no_categories = self.category_counts
-
-        num_categorical_variables = len(self.category_counts)
-        num_regular_variables = self.input_size - num_categorical_variables
-
-        embedding_sizes = [d_model for _, _ in enumerate(self.category_counts)]
-
-        embeddings = []
-        for i in range(num_categorical_variables):
-
-            embedding = keras.Sequential(
-                [keras.layers.InputLayer([time_steps]),
-                    keras.layers.Embedding(
-                        self.category_counts[i],
-                        embedding_sizes[i],
-                        input_length=time_steps,
-                        dtype=tf.float32,
-                    ),])
-            embeddings.append(embedding)
-        categorical_inputs = all_inputs[:, :, num_regular_variables:]
-
-        embedded_inputs = [
-                embeddings[i](categorical_inputs[Ellipsis, i])
-                for i in range(num_categorical_variables)]
-
-        static_inputs= [embedded_inputs[i][:, :, :] for i in range(num_categorical_variables)]
-        # static_inputs = keras.backend.stack(embedded_inputs, axis = 2)
-        return static_inputs[0], static_inputs[1] 
-    
-    def PositionEncoding(self, output_dim, n=10000):
-        # print(type(seq_len), type(output_dim))
-        P = np.zeros((self.time_steps, output_dim))
-        for k in range(self.time_steps):
-            for i in np.arange(int(output_dim/2)):
-                denominator = np.power(n, 2*i/output_dim)
-                P[k, 2*i] = np.sin(k/denominator)
-                P[k, 2*i+1] = np.cos(k/denominator)
-        return tf.convert_to_tensor(P, dtype=tf.float32)
     
     def model_builder(self, hp):
         # hidden_layer_size = hp.Choice("hidden_layer_size", values=HP_HIDDEN_LAYER_SIZE)
@@ -675,6 +634,47 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
             sample_weight_mode="temporal",
         )
         return model
+    
+    def AssetEmbedding(self, all_inputs, d_model):
+        time_steps = self.time_steps
+        no_categories = self.category_counts
+
+        num_categorical_variables = len(self.category_counts)
+        num_regular_variables = self.input_size - num_categorical_variables
+
+        embedding_sizes = [d_model for _, _ in enumerate(self.category_counts)]
+
+        embeddings = []
+        for i in range(num_categorical_variables):
+
+            embedding = keras.Sequential(
+                [keras.layers.InputLayer([time_steps]),
+                    keras.layers.Embedding(
+                        self.category_counts[i],
+                        embedding_sizes[i],
+                        input_length=time_steps,
+                        dtype=tf.float32,
+                    ),])
+            embeddings.append(embedding)
+        categorical_inputs = all_inputs[:, :, num_regular_variables:]
+
+        embedded_inputs = [
+                embeddings[i](categorical_inputs[Ellipsis, i])
+                for i in range(num_categorical_variables)]
+
+        static_inputs= [embedded_inputs[i][:, :, :] for i in range(num_categorical_variables)]
+        # static_inputs = keras.backend.stack(embedded_inputs, axis = 2)
+        return static_inputs[0], static_inputs[1] 
+    
+    def PositionEncoding(self, output_dim, n=10000):
+        # print(type(seq_len), type(output_dim))
+        P = np.zeros((self.time_steps, output_dim))
+        for k in range(self.time_steps):
+            for i in np.arange(int(output_dim/2)):
+                denominator = np.power(n, 2*i/output_dim)
+                P[k, 2*i] = np.sin(k/denominator)
+                P[k, 2*i+1] = np.cos(k/denominator)
+        return tf.convert_to_tensor(P, dtype=tf.float32)
 
 class Time2Vector(tf.keras.layers.Layer):
   def __init__(self, seq_len, model_dim, **kwargs):
