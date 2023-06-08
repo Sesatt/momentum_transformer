@@ -591,7 +591,7 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
         def transformer_encoder(inputs, key_dim, num_heads, ff_dim, dropout=0):
             # Normalization and Attention
             x = tf.keras.layers.LayerNormalization(epsilon=1e-6)(inputs)
-            x = tf.keras.layers.MultiHeadAttention(key_dim=key_dim, num_heads=num_heads, dropout=dropout)(x, x)
+            x = tf.keras.layers.MultiHeadAttention(key_dim=key_dim, num_heads=num_heads, dropout=dropout)(x, x, use_causal_mask = True)
             x = tf.keras.layers.Dropout(dropout)(x)
             res = x + inputs
 
@@ -613,12 +613,12 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
         # x = tf.keras.layers.Dense(ff_final_dim, activation="relu")(x)
         # x = tf.keras.layers.Dropout(dropout_rate)(x)
         
-        outputs = keras.layers.TimeDistributed(
+        outputs = tf.keras.layers.TimeDistributed(
             tf.keras.layers.Dense(
                 self.output_size, 
                 activation = tf.nn.tanh,
                 kernel_constraint = keras.constraints.max_norm(3),
-                ))(x)  # (batch_size, output_size)
+                ))(x[..., :, :])  # (batch_size, output_size)
 
         model = keras.Model(inputs= inputs, outputs=outputs)
 
