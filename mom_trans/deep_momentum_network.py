@@ -571,7 +571,7 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
         no_heads = hp.Choice("no_heads", values = [2,4])
         no_layers = hp.Choice("no_layers", values = [1,2,3])
 
-        d_q = hp.Choice("dq", values = [8, 16, 32, 64]) # is d_model
+        d_q = hp.Choice("dq", values = [ 8, 16, 32, 64]) # is d_model
         ff_dim = hp.Choice("ff_dim", values = [8, 16, 32, 64])
         ff_final_dim = hp.Choice("ff_final_dim", values = [1, 2, 4, 8])
 
@@ -610,8 +610,8 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
         
         # x = tf.keras.layers.GlobalAveragePooling1D(data_format="channels_first")(x)
 
-        x = tf.keras.layers.Dense(ff_final_dim, activation="relu")(x)
-        x = tf.keras.layers.Dropout(dropout_rate)(x)
+        # x = tf.keras.layers.Dense(ff_final_dim, activation="relu")(x)
+        # x = tf.keras.layers.Dropout(dropout_rate)(x)
         
         outputs = tf.keras.layers.TimeDistributed(
             tf.keras.layers.Dense(
