@@ -556,7 +556,7 @@ class LstmDeepMomentumNetworkModel(DeepMomentumNetworkModel):
         return model
 
 class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
-    def __init__(self, project_name, hp_directory, hp_minibatch_size = HP_MINIBATCH_SIZE, **params):
+    def __init__(self, project_name, hp_directory, hp_minibatch_size = [512, 1024], **params):
         params = params.copy()
         self.category_counts = params["category_counts"]
         
@@ -565,15 +565,15 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
     def model_builder(self, hp):    
         # hidden_layer_size = hp.Choice("hidden_layer_size", values=HP_HIDDEN_LAYER_SIZE)
         dropout_rate = hp.Choice("dropout_rate", values=HP_DROPOUT_RATE)
-        max_gradient_norm = hp.Choice("max_gradient_norm", values=[10e-3, 10e-2 , 10e-1])
-        learning_rate = hp.Choice("learning_rate", values=[10e-3, 10e-4])
+        max_gradient_norm = hp.Choice("max_gradient_norm", values=HP_MAX_GRADIENT_NORM)
+        learning_rate = hp.Choice("learning_rate", values=HP_LEARNING_RATE)
         # minibatch_size = hp.Choice("hidden_layer_size", [512, 1024])
         no_heads = hp.Choice("no_heads", values = [2,4])
         no_layers = hp.Choice("no_layers", values = [1,2,3])
 
-        d_q = hp.Choice("dq", values = [ 8, 16, 32, 64]) # is d_model
+        d_q = hp.Choice("dq", values = [8, 16, 32, 64, 128, 256]) # is d_model
         ff_dim = hp.Choice("ff_dim", values = [8, 16, 32, 64])
-        ff_final_dim = hp.Choice("ff_final_dim", values = [1, 2, 4, 8])
+        # ff_final_dim = hp.Choice("ff_final_dim", values = [1, 2, 4, 8])
 
         d_k  = d_q // no_heads
 
@@ -601,7 +601,7 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
             x = tf.keras.layers.Dropout(dropout)(x)
             x = tf.keras.layers.Conv1D(filters=inputs.shape[-1], kernel_size=1)(x)
             
-            out = x + res
+            out = res + x
             x = tf.keras.layers.LayerNormalization(epsilon=1e-6)(out)
             return x
 
