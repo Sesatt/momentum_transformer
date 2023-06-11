@@ -616,7 +616,7 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
         outputs = tf.keras.layers.TimeDistributed(
             tf.keras.layers.Dense(
                 self.output_size, 
-                activation = tf.nn.tanh,
+                activation = tf.nn.softmax,
                 kernel_constraint = keras.constraints.max_norm(3),
                 ))(x[..., :, :])  # (batch_size, output_size)
 
