@@ -18,7 +18,7 @@ TIME_FEATURES = False
 FORCE_OUTPUT_SHARPE_LENGTH = None
 EVALUATE_DIVERSIFIED_VAL_SHARPE = True
 NAME = "experiment_sp500_tsmom"
-
+TRANSACTION_COSTS = 25/10000
 
 def main(
     experiment: str,
@@ -101,6 +101,7 @@ def main(
         params["train_valid_ratio"] = TRAIN_VALID_RATIO
         params["time_features"] = TIME_FEATURES
         params["force_output_sharpe_length"] = FORCE_OUTPUT_SHARPE_LENGTH
+        params["transaction_costs"] = TRANSACTION_COSTS
 
         if TEST_MODE:
             params["num_epochs"] = 1

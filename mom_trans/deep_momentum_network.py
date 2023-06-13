@@ -63,6 +63,7 @@ class SharpeValidationLoss(keras.callbacks.Callback):
         weights_save_location="tmp/checkpoint",
         # verbose=0,
         min_delta=1e-4,
+        transaction_costs = None
     ):
         super(keras.callbacks.Callback, self).__init__()
         self.inputs = inputs
@@ -77,6 +78,7 @@ class SharpeValidationLoss(keras.callbacks.Callback):
         # self.best_weights = None
         self.weights_save_location = weights_save_location
         # self.verbose = verbose
+        self.transaction_costs = transaction_costs
 
     def set_weights_save_loc(self, weights_save_location):
         self.weights_save_location = weights_save_location
@@ -92,21 +94,44 @@ class SharpeValidationLoss(keras.callbacks.Callback):
             workers=self.n_multiprocessing_workers,
             use_multiprocessing=True,  # , batch_size=1
         )
-
-        captured_returns = tf.math.unsorted_segment_mean(
-            positions * self.returns, self.time_indices, self.num_time
-        )[1:]
+        
+        if self.transaction_costs: 
+            diff_position = np.diff(positions, axis=1)
+            abs_diff_position = np.abs(diff_position)
+            abs_diff_position[np.isnan(abs_diff_position)] = 0.0
+            abs_diff_position = np.concatenate((np.expand_dims(np.zeros_like(positions[:, 0, 0]), axis  = (1,2)), abs_diff_position), axis=1)
+            
+            # captured_returns = tf.math.unsorted_segment_mean(
+            # positions * self.returns - abs_diff_position*self.transaction_costs, self.time_indices, self.num_time
+            # )[1:]
+            captured_returns = positions * self.returns - abs_diff_position*self.transaction_costs
+        else:
+            # captured_returns = tf.math.unsorted_segment_mean(
+            #     positions * self.returns, self.time_indices, self.num_time
+            # )[1:]
+            captured_returns = positions*self.returns
         # ignoring null times
 
-        # TODO sharpe
+        mean_returns = tf.reduce_mean(captured_returns)
         sharpe = (
-            tf.reduce_mean(captured_returns)
+            mean_returns
             / tf.sqrt(
-                tf.math.reduce_variance(captured_returns)
+                tf.reduce_mean(tf.square(captured_returns))
+                - tf.square(mean_returns)
                 + tf.constant(1e-9, dtype=tf.float64)
             )
             * tf.sqrt(tf.constant(252.0, dtype=tf.float64))
         ).numpy()
+
+        # TODO sharpe
+        # sharpe = (
+        #     tf.reduce_mean(captured_returns)
+        #     / tf.sqrt(
+        #         tf.math.reduce_variance(captured_returns)
+        #         + tf.constant(1e-9, dtype=tf.float64)
+        #     )
+        #     * tf.sqrt(tf.constant(252.0, dtype=tf.float64))
+        # ).numpy()
         if sharpe > self.best_sharpe + self.min_delta:
             self.best_sharpe = sharpe
             self.patience_counter = 0  # reset the count
@@ -239,6 +264,7 @@ class DeepMomentumNetworkModel(ABC):
         self.random_search_iterations = params["random_search_iterations"]
         self.evaluate_diversified_val_sharpe = params["evaluate_diversified_val_sharpe"]
         self.force_output_sharpe_length = params["force_output_sharpe_length"]
+        self.transaction_costs = params["transaction_costs"]
 
         print("Deep Momentum Network params:")
         for k in params:
@@ -302,6 +328,7 @@ class DeepMomentumNetworkModel(ABC):
                     num_val_time,
                     self.early_stopping_patience,
                     self.n_multiprocessing_workers,
+                    transaction_costs= self.transaction_costs
                 ),
                 tf.keras.callbacks.TerminateOnNaN(),
             ]
@@ -382,6 +409,7 @@ class DeepMomentumNetworkModel(ABC):
                     self.early_stopping_patience,
                     self.n_multiprocessing_workers,
                     weights_save_location=temp_folder,
+                    transaction_costs=self.transaction_costs
                 ),
                 tf.keras.callbacks.TerminateOnNaN(),
             ]
@@ -582,11 +610,16 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
 
         inputs = keras.Input(shape = (time_steps, self.input_size))
 
-        x = tf.keras.layers.Dense(d_q)(inputs)
-        pos_enc = self.PositionEncoding(d_q)
+        x = keras.layers.TimeDistributed(keras.layers.Dense(d_q))(inputs)
+        x = T2V(d_q)(x)
+
+        # x = tf.keras.layers.Dense(d_q)(inputs)
+        
+        # pos_enc = self.PositionEncoding(d_q)
 
         ticker_enc, class_enc = self.AssetEmbedding(inputs, d_q)
-        x = x + pos_enc + ticker_enc + class_enc
+        x = tf.concat([x, tf.concat([ticker_enc, class_enc], axis = -1)], axis = -1)
+        # x = x + pos_enc + ticker_enc + class_enc
 
         def transformer_encoder(inputs, key_dim, num_heads, ff_dim, dropout=0):
             # Normalization and Attention
@@ -673,6 +706,70 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
                 P[k, 2*i] = np.sin(k/denominator)
                 P[k, 2*i+1] = np.cos(k/denominator)
         return tf.convert_to_tensor(P, dtype=tf.float32)
+    
+    def get_embeddings(self, all_inputs):
+        """Transforms raw inputs to embeddings.
+
+        Applies linear transformation onto continuous variables and uses embeddings
+        for categorical variables.
+
+        Args:
+          all_inputs: Inputs to transform
+
+        Returns:
+          Tensors for transformed inputs.
+        """
+
+        time_steps = self.time_steps
+
+        num_categorical_variables = len(self.category_counts)
+        num_regular_variables = self.input_size - num_categorical_variables
+
+        embedding_sizes = [self.hidden_layer_size for _, _ in enumerate(self.category_counts)]
+
+        embeddings = []
+        for i in range(num_categorical_variables):
+            embedding = keras.Sequential(
+                [
+                    keras.layers.InputLayer([time_steps]),
+                    keras.layers.Embedding(
+                        self.category_counts[i],
+                        embedding_sizes[i],
+                        input_length=time_steps,
+                        dtype=tf.float32,),])
+            embeddings.append(embedding)
+
+        regular_inputs, categorical_inputs = (
+            all_inputs[:, :, :num_regular_variables],
+            all_inputs[:, :, num_regular_variables:],
+        )
+
+        embedded_inputs = [
+            embeddings[i](categorical_inputs[Ellipsis, i])
+            for i in range(num_categorical_variables)]
+
+        # Static inputs
+        known_categorical_inputs = [
+            embedded_inputs[i][:, 0, :]
+            for i in range(num_categorical_variables)]
+
+
+        def convert_real_to_embedding(x):
+            """Applies linear transformation for time-varying inputs."""
+            return keras.layers.TimeDistributed(
+                keras.layers.Dense(self.hidden_layer_size)
+            )(x)
+
+        # A priori known inputs
+        known_regular_inputs = [
+            convert_real_to_embedding(regular_inputs[Ellipsis, i : i + 1])
+            for i in range(num_regular_variables)]
+
+        known_combined_layer = keras.backend.stack(
+            known_regular_inputs + known_categorical_inputs, axis=-1
+        )
+
+        return known_combined_layer
 
 class Time2Vector(tf.keras.layers.Layer):
   def __init__(self, seq_len, model_dim, **kwargs):
@@ -722,3 +819,35 @@ class Time2Vector(tf.keras.layers.Layer):
   
   def compute_output_shape(self, input_shape): 
     return (input_shape[0], input_shape[1], self.output_dim)
+
+class T2V(tf.keras.layers.Layer):
+    
+    def __init__(self, output_dim=None, **kwargs):
+        self.output_dim = output_dim
+        super(T2V, self).__init__(**kwargs)
+        
+    def build(self, input_shape):
+        self.W = self.add_weight(name='W',
+                      shape=(input_shape[1], self.output_dim),
+                      initializer='uniform',
+                      trainable=True)
+        self.P = self.add_weight(name='P',
+                      shape=(input_shape[1], self.output_dim),
+                      initializer='uniform',
+                      trainable=True)
+        self.w = self.add_weight(name='w',
+                      shape=(input_shape[1], 1),
+                      initializer='uniform',
+                      trainable=True)
+        self.p = self.add_weight(name='p',
+                      shape=(input_shape[1], 1),
+                      initializer='uniform',
+                      trainable=True)
+        super(T2V, self).build(input_shape)
+        
+    def call(self, x):
+        
+        original = self.w * x + self.p
+        sin_trans = tf.math.sin(tf.multiply(x, self.W) + self.P)
+
+        return tf.concat([sin_trans, original], -1)
