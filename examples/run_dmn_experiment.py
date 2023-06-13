@@ -18,7 +18,7 @@ TIME_FEATURES = False
 FORCE_OUTPUT_SHARPE_LENGTH = None
 EVALUATE_DIVERSIFIED_VAL_SHARPE = True
 NAME = "experiment_sp500_tsmom_newsharpe"
-TRANSACTION_COSTS = 25/10000
+TRANSACTION_COSTS = None
 
 def main(
     experiment: str,
