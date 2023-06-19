@@ -17,7 +17,7 @@ TRAIN_VALID_RATIO = 0.90
 TIME_FEATURES = False
 FORCE_OUTPUT_SHARPE_LENGTH = None
 EVALUATE_DIVERSIFIED_VAL_SHARPE = True
-NAME = "experiment_sp500_tsmom_newsharpe"
+NAME = "experiment_sp500_tsmom_monthly"
 TRANSACTION_COSTS = None
 
 def main(
@@ -115,7 +115,7 @@ def main(
         else:
             features_file_path = os.path.join(
                 "data",
-                "quandl_cpd_nonelbw_tsmom.csv",
+                "quandl_cpd_nonelbw_tsmom_v2.csv",
             )
 
         run_all_windows(
