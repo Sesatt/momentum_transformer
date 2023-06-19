@@ -101,37 +101,37 @@ class SharpeValidationLoss(keras.callbacks.Callback):
             abs_diff_position[np.isnan(abs_diff_position)] = 0.0
             abs_diff_position = np.concatenate((np.expand_dims(np.zeros_like(positions[:, 0, 0]), axis  = (1,2)), abs_diff_position), axis=1)
             
-            # captured_returns = tf.math.unsorted_segment_mean(
-            # positions * self.returns - abs_diff_position*self.transaction_costs, self.time_indices, self.num_time
-            # )[1:]
-            captured_returns = positions * self.returns - abs_diff_position*self.transaction_costs
+            captured_returns = tf.math.unsorted_segment_mean(
+            positions * self.returns - abs_diff_position*self.transaction_costs, self.time_indices, self.num_time
+            )[1:]
+            # captured_returns = positions * self.returns - abs_diff_position*self.transaction_costs
         else:
-            # captured_returns = tf.math.unsorted_segment_mean(
-            #     positions * self.returns, self.time_indices, self.num_time
-            # )[1:]
-            captured_returns = positions*self.returns
+            captured_returns = tf.math.unsorted_segment_mean(
+                positions * self.returns, self.time_indices, self.num_time
+            )[1:]
+            # captured_returns = positions*self.returns
         # ignoring null times
 
-        mean_returns = tf.reduce_mean(captured_returns)
-        sharpe = (
-            mean_returns
-            / tf.sqrt(
-                tf.reduce_mean(tf.square(captured_returns))
-                - tf.square(mean_returns)
-                + tf.constant(1e-9, dtype=tf.float64)
-            )
-            * tf.sqrt(tf.constant(252.0, dtype=tf.float64))
-        ).numpy()
-
-        # TODO sharpe
+        # mean_returns = tf.reduce_mean(captured_returns)
         # sharpe = (
-        #     tf.reduce_mean(captured_returns)
+        #     mean_returns
         #     / tf.sqrt(
-        #         tf.math.reduce_variance(captured_returns)
+        #         tf.reduce_mean(tf.square(captured_returns))
+        #         - tf.square(mean_returns)
         #         + tf.constant(1e-9, dtype=tf.float64)
         #     )
         #     * tf.sqrt(tf.constant(252.0, dtype=tf.float64))
         # ).numpy()
+
+        # TODO sharpe
+        sharpe = (
+            tf.reduce_mean(captured_returns)
+            / tf.sqrt(
+                tf.math.reduce_variance(captured_returns)
+                + tf.constant(1e-9, dtype=tf.float64)
+            )
+            * tf.sqrt(tf.constant(252.0, dtype=tf.float64))
+        ).numpy()
         if sharpe > self.best_sharpe + self.min_delta:
             self.best_sharpe = sharpe
             self.patience_counter = 0  # reset the count
@@ -610,8 +610,8 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
 
         inputs = keras.Input(shape = (time_steps, self.input_size))
 
-        x = keras.layers.TimeDistributed(keras.layers.Dense(d_q))(inputs)
-        x = T2V(d_q)(x)
+        x = keras.layers.TimeDistributed(keras.layers.Dense(d_q))(inputs) # output has shape (?, timesteps, d_q)
+        x = T2V(d_q)(x) ()
 
         # x = tf.keras.layers.Dense(d_q)(inputs)
         
@@ -697,29 +697,9 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
         # static_inputs = keras.backend.stack(embedded_inputs, axis = 2)
         return static_inputs[0], static_inputs[1] 
     
-    def PositionEncoding(self, output_dim, n=10000):
-        # print(type(seq_len), type(output_dim))
-        P = np.zeros((self.time_steps, output_dim))
-        for k in range(self.time_steps):
-            for i in np.arange(int(output_dim/2)):
-                denominator = np.power(n, 2*i/output_dim)
-                P[k, 2*i] = np.sin(k/denominator)
-                P[k, 2*i+1] = np.cos(k/denominator)
-        return tf.convert_to_tensor(P, dtype=tf.float32)
     
     def get_embeddings(self, all_inputs):
-        """Transforms raw inputs to embeddings.
-
-        Applies linear transformation onto continuous variables and uses embeddings
-        for categorical variables.
-
-        Args:
-          all_inputs: Inputs to transform
-
-        Returns:
-          Tensors for transformed inputs.
-        """
-
+        
         time_steps = self.time_steps
 
         num_categorical_variables = len(self.category_counts)
@@ -770,84 +750,130 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
         )
 
         return known_combined_layer
-
-class Time2Vector(tf.keras.layers.Layer):
-  def __init__(self, seq_len, model_dim, **kwargs):
-    super(Time2Vector, self).__init__()
-    self.seq_len = seq_len
-    self.output_dim = model_dim
-
-  def build(self, input_shape):
-    '''Initialize weights and biases with shape (batch, seq_len)'''
-    self.weights_linear = self.add_weight(name='weight_linear',
-                                shape=(1, int(self.seq_len), 1),
-                                initializer='uniform',
-                                trainable=True)
     
-    self.bias_linear = self.add_weight(name='bias_linear',
-                                shape=(1, int(self.seq_len),1),
-                                initializer='uniform',
-                                trainable=True)
-    
-    self.weights_periodic = self.add_weight(name='weight_periodic',
-                                shape=(1, int(self.seq_len),self.output_dim),
-                                initializer='uniform',
-                                trainable=True)
+    def PositionEncoding(self, output_dim, n=10000):
+        # print(type(seq_len), type(output_dim))
+        P = np.zeros((self.time_steps, output_dim))
+        for k in range(self.time_steps):
+            for i in np.arange(int(output_dim/2)):
+                denominator = np.power(n, 2*i/output_dim)
+                P[k, 2*i] = np.sin(k/denominator)
+                P[k, 2*i+1] = np.cos(k/denominator)
+        return tf.convert_to_tensor(P, dtype=tf.float32)
 
-    self.bias_periodic = self.add_weight(name='bias_periodic',
-                                shape=(1, int(self.seq_len),self.output_dim),
-                                initializer='uniform',
-                                trainable=True)
-    
-    super(Time2Vector, self).build(self.seq_len)
+class PositionEmbeddingFixedWeights(tf.keras.layers.Layer):
+    def __init__(self, sequence_length, vocab_size, output_dim, **kwargs):
+        super(PositionEmbeddingFixedWeights, self).__init__(**kwargs)
+        word_embedding_matrix = self.get_position_encoding(vocab_size, output_dim)   
+        position_embedding_matrix = self.get_position_encoding(sequence_length, output_dim)                                          
+        self.word_embedding_layer = keras.layers.Embedding(
+            input_dim=vocab_size, output_dim=output_dim,
+            weights=[word_embedding_matrix],
+            trainable=False
+        )
+        self.position_embedding_layer = keras.layers.Embedding(
+            input_dim=sequence_length, output_dim=output_dim,
+            weights=[position_embedding_matrix],
+            trainable=False
+        )
+             
+    def get_position_encoding(self, seq_len, d, n=10000):
+        P = np.zeros((seq_len, d))
+        for k in range(seq_len):
+            for i in np.arange(int(d/2)):
+                denominator = np.power(n, 2*i/d)
+                P[k, 2*i] = np.sin(k/denominator)
+                P[k, 2*i+1] = np.cos(k/denominator)
+        return P
+ 
+ 
+    def call(self, inputs):        
+        position_indices = tf.range(tf.shape(inputs)[-1])
+        embedded_words = self.word_embedding_layer(inputs)
+        embedded_indices = self.position_embedding_layer(position_indices)
+        return embedded_words + embedded_indices
 
-  def call(self, x):
-    '''Calculate linear and periodic time features'''
-    # x = tf.math.reduce_mean(x[:,:,:4], axis=-1)
-    x = tf.expand_dims(x, axis = -1) 
-    time_linear = self.weights_linear * x + self.bias_linear # Linear time feature
-    # time_linear = tf.expand_dims(time_linear, axis=-1) # Add dimension (batch, seq_len, 1)
+# class T2V(tf.keras.layers.Layer):
     
-    time_periodic = tf.math.sin(tf.multiply(x, self.weights_periodic) + self.bias_periodic)
-    # time_periodic = tf.expand_dims(time_periodic, axis=-1) # Add dimension (batch, seq_len, 1)
-    return tf.concat([time_linear, time_periodic], axis=-1) # shape = (batch, seq_len, 2)
+#     def __init__(self, output_dim=None, **kwargs):
+#         self.output_dim = output_dim
+#         super(T2V, self).__init__(**kwargs)
+        
+#     def build(self, input_shape):
+#         self.W = self.add_weight(name='W',
+#                       shape=(input_shape[1], self.output_dim),
+#                       initializer='uniform',
+#                       trainable=True)
+#         self.P = self.add_weight(name='P',
+#                       shape=(input_shape[1], self.output_dim),
+#                       initializer='uniform',
+#                       trainable=True)
+#         self.w = self.add_weight(name='w',
+#                       shape=(input_shape[1], 1),
+#                       initializer='uniform',
+#                       trainable=True)
+#         self.p = self.add_weight(name='p',
+#                       shape=(input_shape[1], 1),
+#                       initializer='uniform',
+#                       trainable=True)
+#         super(T2V, self).build(input_shape)
+        
+#     def call(self, x):
+        
+#         original = self.w * x + self.p
+#         sin_trans = tf.math.sin(tf.multiply(x, self.W) + self.P)
 
-  def get_config(self): # Needed for saving and loading model with custom layer
-    config = super().get_config().copy()
-    config.update({'seq_len': self.seq_len})
-    return config
+#         return tf.concat([sin_trans, original], -1)
+    
+
+
+
+
+# class Time2Vector(tf.keras.layers.Layer):
+#   def __init__(self, seq_len, model_dim, **kwargs):
+#     super(Time2Vector, self).__init__()
+#     self.seq_len = seq_len
+#     self.output_dim = model_dim
+
+#   def build(self, input_shape):
+#     '''Initialize weights and biases with shape (batch, seq_len)'''
+#     self.weights_linear = self.add_weight(name='weight_linear',
+#                                 shape=(1, int(self.seq_len), 1),
+#                                 initializer='uniform',
+#                                 trainable=True)
+    
+#     self.bias_linear = self.add_weight(name='bias_linear',
+#                                 shape=(1, int(self.seq_len),1),
+#                                 initializer='uniform',
+#                                 trainable=True)
+    
+#     self.weights_periodic = self.add_weight(name='weight_periodic',
+#                                 shape=(1, int(self.seq_len),self.output_dim),
+#                                 initializer='uniform',
+#                                 trainable=True)
+
+#     self.bias_periodic = self.add_weight(name='bias_periodic',
+#                                 shape=(1, int(self.seq_len),self.output_dim),
+#                                 initializer='uniform',
+#                                 trainable=True)
+    
+#     super(Time2Vector, self).build(self.seq_len)
+
+#   def call(self, x):
+#     '''Calculate linear and periodic time features'''
+#     # x = tf.math.reduce_mean(x[:,:,:4], axis=-1)
+#     x = tf.expand_dims(x, axis = -1) 
+#     time_linear = self.weights_linear * x + self.bias_linear # Linear time feature
+#     # time_linear = tf.expand_dims(time_linear, axis=-1) # Add dimension (batch, seq_len, 1)
+    
+#     time_periodic = tf.math.sin(tf.multiply(x, self.weights_periodic) + self.bias_periodic)
+#     # time_periodic = tf.expand_dims(time_periodic, axis=-1) # Add dimension (batch, seq_len, 1)
+#     return tf.concat([time_linear, time_periodic], axis=-1) # shape = (batch, seq_len, 2)
+
+#   def get_config(self): # Needed for saving and loading model with custom layer
+#     config = super().get_config().copy()
+#     config.update({'seq_len': self.seq_len})
+#     return config
   
-  def compute_output_shape(self, input_shape): 
-    return (input_shape[0], input_shape[1], self.output_dim)
-
-class T2V(tf.keras.layers.Layer):
-    
-    def __init__(self, output_dim=None, **kwargs):
-        self.output_dim = output_dim
-        super(T2V, self).__init__(**kwargs)
-        
-    def build(self, input_shape):
-        self.W = self.add_weight(name='W',
-                      shape=(input_shape[1], self.output_dim),
-                      initializer='uniform',
-                      trainable=True)
-        self.P = self.add_weight(name='P',
-                      shape=(input_shape[1], self.output_dim),
-                      initializer='uniform',
-                      trainable=True)
-        self.w = self.add_weight(name='w',
-                      shape=(input_shape[1], 1),
-                      initializer='uniform',
-                      trainable=True)
-        self.p = self.add_weight(name='p',
-                      shape=(input_shape[1], 1),
-                      initializer='uniform',
-                      trainable=True)
-        super(T2V, self).build(input_shape)
-        
-    def call(self, x):
-        
-        original = self.w * x + self.p
-        sin_trans = tf.math.sin(tf.multiply(x, self.W) + self.P)
-
-        return tf.concat([sin_trans, original], -1)
+#   def compute_output_shape(self, input_shape): 
+#     return (input_shape[0], input_shape[1], self.output_dim)
