@@ -17,7 +17,7 @@ TRAIN_VALID_RATIO = 0.90
 TIME_FEATURES = False
 FORCE_OUTPUT_SHARPE_LENGTH = None
 EVALUATE_DIVERSIFIED_VAL_SHARPE = True
-NAME = "experiment_sp500_tsmom_monthly"
+NAME = "experiment_sp500_tsmom"
 TRANSACTION_COSTS = None
 
 def main(
@@ -115,7 +115,7 @@ def main(
         else:
             features_file_path = os.path.join(
                 "data",
-                "quandl_cpd_nonelbw_tsmom_v2.csv",
+                "quandl_cpd_nonelbw_tsmom.csv",
             )
 
         run_all_windows(
@@ -184,7 +184,7 @@ if __name__ == "__main__":
             metavar="w",
             type=int,
             nargs="?",
-            default=2,
+            default=5,
             help="Test window length in years.",
         )
         parser.add_argument(
