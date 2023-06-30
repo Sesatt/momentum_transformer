@@ -537,7 +537,8 @@ class LstmDeepMomentumNetworkModel(DeepMomentumNetworkModel):
 
         output = tf.keras.layers.TimeDistributed(
             tf.keras.layers.Dense(
-                self.output_size,
+                # self.output_size, 
+                2,
                 activation=tf.nn.softmax,
                 kernel_constraint=keras.constraints.max_norm(3),
             )
