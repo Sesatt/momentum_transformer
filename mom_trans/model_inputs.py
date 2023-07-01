@@ -209,6 +209,7 @@ class ModelFeatures:
 
         test = df.loc[years >= test_boundary]
 
+        print('split tickers individually')
         if split_tickers_individually:
             trainvalid = df.loc[years < test_boundary]
             if lags:
@@ -219,6 +220,7 @@ class ModelFeatures:
                 tickers = tickers[tickers].index.tolist()
             else:
                 tickers = list(trainvalid.ticker.unique())
+                print(str(len(tickers)) + ' tickers in this df')
 
             train, valid = [], []
             for ticker in tickers:
