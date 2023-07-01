@@ -77,7 +77,7 @@ class ModelFeatures:
         changepoint_lbws=None,
         train_valid_sliding=False,
         # add_buffer_years_to_test=1,  # TODO FIX THIS!!!!
-        transform_real_inputs=True,  # TODO remove this
+        transform_real_inputs=False,  # TODO remove this
         train_valid_ratio=0.9,
         split_tickers_individually=True,
         add_ticker_as_static=True,
