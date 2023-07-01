@@ -90,7 +90,7 @@ def main(
         PROJECT_NAME = _project_name + str(v)
 
         intervals = [
-            (y - 3, y, min(y + test_window_size, test_end -1))
+            (train_start, y, min(y + test_window_size, test_end -1))
             for y in range(test_start, test_end - 1, test_window_size)
         ]
 
@@ -168,7 +168,7 @@ if __name__ == "__main__":
             metavar="t",
             type=int,
             nargs="?",
-            default=2000,
+            default=2010,
             help="Training end year and test start year.",
         )
         parser.add_argument(
@@ -184,7 +184,7 @@ if __name__ == "__main__":
             metavar="w",
             type=int,
             nargs="?",
-            default=1,
+            default=2,
             help="Test window length in years.",
         )
         parser.add_argument(
