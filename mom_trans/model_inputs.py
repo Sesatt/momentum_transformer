@@ -118,6 +118,8 @@ class ModelFeatures:
             # ("mve_log", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
             # ("beta", DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
         ]
+
+        print('create features')
         df = df.dropna()
         df = df[df["year"] >= start_boundary].copy()
         years = df["year"]
@@ -305,6 +307,7 @@ class ModelFeatures:
             for data in [train, valid, test, test_with_buffer]
         ]
 
+        print('batch data...')
         if lags:
             self.train = self._batch_data_smaller_output(
                 train, train_valid_sliding, self.lags
