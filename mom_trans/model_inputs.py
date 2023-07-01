@@ -75,7 +75,7 @@ class ModelFeatures:
         test_boundary=2020,
         test_end=2023,
         changepoint_lbws=None,
-        train_valid_sliding=False,
+        train_valid_sliding=True,
         # add_buffer_years_to_test=1,  # TODO FIX THIS!!!!
         transform_real_inputs=False,  # TODO remove this
         train_valid_ratio=0.9,
@@ -229,7 +229,7 @@ class ModelFeatures:
                 T = len(calib_data)
                 train_valid_split = int(train_valid_ratio * T)
                 train.append(calib_data.iloc[:train_valid_split, :].copy())
-                valid.append(calib_data.iloc[train_valid_split:, :].copy())
+                valid.append(calib_data.iloc[train_valid_split-251:, :].copy())
 
             train = pd.concat(train)
             valid = pd.concat(valid)
@@ -309,7 +309,8 @@ class ModelFeatures:
             self.transform_inputs(data)
             for data in [train, valid, test, test_with_buffer]
         ]
-
+        
+        print(train.shape)
         print('batch data...')
         if lags:
             self.train = self._batch_data_smaller_output(
@@ -556,7 +557,7 @@ class ModelFeatures:
                         rand_test123 = arr.shape
                     except:
                         print("output is None")
-                        break
+                        continue
                         
                     if k not in data_map:
                         data_map[k] = [arr]
