@@ -203,6 +203,7 @@ class ModelFeatures:
                     )
                 )
 
+        print('transform inputs')
         self.transform_real_inputs = transform_real_inputs
 
         # for static_variables
