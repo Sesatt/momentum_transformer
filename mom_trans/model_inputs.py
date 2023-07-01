@@ -122,11 +122,10 @@ class ModelFeatures:
         print('create features')
         df = df.dropna()
         df = df[df["year"] >= start_boundary].copy()
-        years = df["year"]
         df.start = pd.to_datetime(df.start)
         df.ending = pd.to_datetime(df.ending)
         df = df[(df.ending.dt.year >= test_boundary) & (df.start.dt.year < test_boundary)].copy()
-
+        years = df["year"]
 
         self.identifiers = None
         self._real_scalers = None
