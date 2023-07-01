@@ -184,6 +184,7 @@ class ModelFeatures:
 #             )
 #             # df["month_of_year"] = MinMaxScaler().fit_transform(df[["month_of_year"]].values).flatten()
 
+        print('add ticker as static')
         if add_ticker_as_static:
             self._column_definition.append(
                 (f"static_ticker", DataTypes.CATEGORICAL, InputTypes.STATIC_INPUT)
