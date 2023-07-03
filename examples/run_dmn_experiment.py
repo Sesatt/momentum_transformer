@@ -115,7 +115,7 @@ def main(
         else:
             features_file_path = os.path.join(
                 "data",
-                "quandl_cpd_nonelbw_tsmom_full.csv",
+                "quandl_cpd_nonelbw_tsmom_full_top5.csv",
             )
 
         run_all_windows(
@@ -184,7 +184,7 @@ if __name__ == "__main__":
             metavar="w",
             type=int,
             nargs="?",
-            default=1,
+            default=2,
             help="Test window length in years.",
         )
         parser.add_argument(
@@ -192,7 +192,7 @@ if __name__ == "__main__":
             metavar="r",
             type=int,
             nargs="?",
-            default=2,
+            default=1,
             help="Number of experiment repeats.",
         )
 
