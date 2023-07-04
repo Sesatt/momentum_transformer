@@ -1,6 +1,6 @@
 MODLE_PARAMS = {
     "architecture": "TFT",
-    "total_time_steps": 252,
+    "total_time_steps": 120,
     "early_stopping_patience": 15,
     "multiprocessing_workers": 32,
     "num_epochs": 300,
@@ -8,7 +8,7 @@ MODLE_PARAMS = {
     "split_tickers_individually": True,
     "random_search_iterations": 30 ,
     "evaluate_diversified_val_sharpe": True,
-    "train_valid_ratio": 0.90,
+    "train_valid_ratio": 0.80,
     "time_features": False,
     "force_output_sharpe_length": 0,
 }
