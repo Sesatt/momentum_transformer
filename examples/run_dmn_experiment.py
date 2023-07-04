@@ -168,7 +168,7 @@ if __name__ == "__main__":
             metavar="t",
             type=int,
             nargs="?",
-            default=2000,
+            default=2005,
             help="Training end year and test start year.",
         )
         parser.add_argument(
