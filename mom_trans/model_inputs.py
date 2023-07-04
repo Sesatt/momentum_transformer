@@ -231,7 +231,7 @@ class ModelFeatures:
                 T = len(calib_data)
                 train_valid_split = int(train_valid_ratio * T)
                 train.append(calib_data.iloc[:train_valid_split, :].copy())
-                valid.append(calib_data.iloc[train_valid_split-251:, :].copy())
+                valid.append(calib_data.iloc[train_valid_split-(self.total_time_steps -1):, :].copy())
 
             train = pd.concat(train)
             valid = pd.concat(valid)
