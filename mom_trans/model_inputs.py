@@ -569,6 +569,7 @@ class ModelFeatures:
             # Combine all data
             for k in data_map:
                 data_map[k] = np.concatenate(data_map[k], axis=0)
+                print(data_map[k].shape)
 
             active_entries = np.ones_like(data_map["outputs"])
             if "active_entries" not in data_map:
