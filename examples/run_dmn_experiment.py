@@ -42,7 +42,7 @@ def main(
         changepoint_lbws = [63]
     elif experiment == "TFT":
         architecture = "TFT"
-        lstm_time_steps = 252
+        lstm_time_steps = 120
         changepoint_lbws = None
     elif experiment == "TFT-CPD-126-21":
         architecture = "TFT"
