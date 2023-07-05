@@ -3,7 +3,7 @@ MODLE_PARAMS = {
     "total_time_steps": 252,
     "early_stopping_patience": 15,
     "multiprocessing_workers": 32,
-    "num_epochs": 300,
+    "num_epochs": 1,
     "fill_blank_dates": False,
     "split_tickers_individually": True,
     "random_search_iterations": 1,
