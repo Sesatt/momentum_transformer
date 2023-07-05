@@ -46,7 +46,7 @@ class SharpeLoss(tf.keras.losses.Loss):
                 - tf.square(mean_returns)
                 + 1e-9
             )
-            * tf.sqrt(12.0)
+            * tf.sqrt(252.0)
         )
 
 
@@ -130,7 +130,7 @@ class SharpeValidationLoss(keras.callbacks.Callback):
                 tf.math.reduce_variance(captured_returns)
                 + tf.constant(1e-9, dtype=tf.float64)
             )
-            * tf.sqrt(tf.constant(12.0, dtype=tf.float64))
+            * tf.sqrt(tf.constant(252.0, dtype=tf.float64))
         ).numpy()
         if sharpe > self.best_sharpe + self.min_delta:
             self.best_sharpe = sharpe
@@ -597,7 +597,7 @@ class TransformerDeepMomentumNetworkModel(DeepMomentumNetworkModel):
         learning_rate = hp.Choice("learning_rate", values=HP_LEARNING_RATE)
         # minibatch_size = hp.Choice("hidden_layer_size", [512, 1024])
         no_heads = hp.Choice("no_heads", values = [2,4])
-        no_layers = hp.Choice("no_layers", values = [1,2,4])
+        no_layers = hp.Choice("no_layers", values = [1,2,3])
 
         d_q = hp.Choice("dq", values = [8, 16, 32, 64, 128, 256]) # is d_model
         ff_dim = hp.Choice("ff_dim", values = [8, 16, 32, 64])
