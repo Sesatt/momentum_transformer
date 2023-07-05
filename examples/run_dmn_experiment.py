@@ -184,7 +184,7 @@ if __name__ == "__main__":
             metavar="w",
             type=int,
             nargs="?",
-            default=5,
+            default=2,
             help="Test window length in years.",
         )
         parser.add_argument(
