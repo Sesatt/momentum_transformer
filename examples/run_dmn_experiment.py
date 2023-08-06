@@ -115,7 +115,7 @@ def main(
         else:
             features_file_path = os.path.join(
                 "data",
-                "quandl_cpd_nonelbw_tsmom_full_top5.csv",
+                "quandl_cpd_nonelbw_tsmom.csv",
             )
 
         run_all_windows(
