@@ -122,11 +122,11 @@ class ModelFeatures:
         print('create features')
         df = df.dropna()
         df = df[df["year"] >= start_boundary].copy()
-        # ticker_filter = df[(df.year == test_boundary) & (df.top5 == 1)].ticker.unique()
-        # df = df[df.ticker.isin(ticker_filter)]
-        # df.start = pd.to_datetime(df.start)
-        # df.ending = pd.to_datetime(df.ending)
-        # df = df[(df.ending.dt.year >= test_boundary) & (df.start.dt.year < test_boundary)].copy()
+        ticker_filter = df[(df.year == test_boundary) & (df.top5 == 1)].ticker.unique()
+        df = df[df.ticker.isin(ticker_filter)]
+        df.start = pd.to_datetime(df.start)
+        df.ending = pd.to_datetime(df.ending)
+        df = df[(df.ending.dt.year >= test_boundary) & (df.start.dt.year < test_boundary)].copy()
         years = df["year"]
 
         self.identifiers = None
