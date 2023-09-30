@@ -17,7 +17,7 @@ TRAIN_VALID_RATIO = 0.80
 TIME_FEATURES = False
 FORCE_OUTPUT_SHARPE_LENGTH = None
 EVALUATE_DIVERSIFIED_VAL_SHARPE = True
-NAME = "experiment_sp500_tsmom_final_2022"
+NAME = "experiment_sp500_tsmom_final"
 TRANSACTION_COSTS = None
 
 def main(
