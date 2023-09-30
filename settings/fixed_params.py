@@ -6,7 +6,7 @@ MODLE_PARAMS = {
     "num_epochs": 200,
     "fill_blank_dates": False,
     "split_tickers_individually": True,
-    "random_search_iterations": 20,
+    "random_search_iterations": 2, #20
     "evaluate_diversified_val_sharpe": True,
     "train_valid_ratio": 0.80,
     "time_features": False,
