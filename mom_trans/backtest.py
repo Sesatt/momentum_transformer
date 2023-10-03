@@ -627,9 +627,12 @@ def intermediate_momentum_position(w: float, returns_data: pd.DataFrame) -> pd.S
     Returns:
         pd.Series: series of position sizes
     """
-    return w * np.sign(returns_data["norm_monthly_return"]) + (1 - w) * np.sign(
-        returns_data["norm_annual_return"]
-    )
+    moskowitz = returns_data.copy()
+    moskowitz["t1-11"] = np.log(1+moskowitz["norm_annual_return"]) - np.log(1+moskowitz["norm_monthly_return"])
+    return np.sign(moskowitz["t1-11"])
+
+    # return w * np.sign(returns_data["norm_monthly_return"]) + (1 - w) * np.sign(
+    #     returns_data["norm_annual_return"])
 
 
 def run_classical_methods(
@@ -670,7 +673,7 @@ def run_classical_methods(
             left_on=["date", "ticker"],
             right_on=["time", "identifier"],
         )
-        returns_data["position"] = intermediate_momentum_position(0, returns_data)
+        returns_data["position"] = intermediate_momentum_position(0.5, returns_data)
         # returns_data["returns"] = returns_data["scaled_return_target"]
         returns_data["captured_returns"] = (
             returns_data["position"] * returns_data["returns"]
