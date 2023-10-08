@@ -4,7 +4,7 @@ import pathlib
 import shutil
 import copy
 
-from keras_tuner.tuners.randomsearch import RandomSearch
+# from keras_tuner.tuners.randomsearch import RandomSearch
 from abc import ABC, abstractmethod
 
 from tensorflow import keras
