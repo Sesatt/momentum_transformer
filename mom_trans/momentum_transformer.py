@@ -791,7 +791,7 @@ class TftDeepMomentumNetworkModel(DeepMomentumNetworkModel):
               selection weights, along with their identifiers and time indices
         """
 
-        if mask:
+        if mask is not None:
             inputs = data["inputs"][mask]
             identifiers = data["identifier"][mask]
             time = data["date"][mask]
