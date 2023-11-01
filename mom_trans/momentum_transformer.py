@@ -849,3 +849,57 @@ class TftDeepMomentumNetworkModel(DeepMomentumNetworkModel):
         attention_weights["time"] = time[:, :, 0]
 
         return attention_weights
+    
+    def get_var_importance(self, data, batch_size):
+        inputs = data["inputs"]
+        identifiers = data["identifier"]
+        time = data["date"]
+
+        def get_batch_attention_weights(input_batch):
+            """Returns weights for a given minibatch of data."""
+            input_placeholder = self._input_placeholder
+            attention_weights = {}
+            k = 'hisorical_flags'
+
+            extractor = tf.keras.Model(
+                inputs=input_placeholder, outputs=self._attention_components[k]
+            )
+            attention_weight = extractor(input_batch.astype(np.float32))
+            attention_weights[k] = attention_weight
+            return attention_weights
+
+        # Compute number of batches
+        # batch_size = self.minibatch_size
+        n = inputs.shape[0]
+        num_batches = n // batch_size
+        if n - (num_batches * batch_size) > 0:
+            num_batches += 1
+
+        # Split up inputs into batches
+        batched_inputs = [
+            inputs[i * batch_size : (i + 1) * batch_size, Ellipsis]
+            for i in range(num_batches)
+        ]
+
+        # Get attention weights, while avoiding large memory increases
+        attention_by_batch = [
+            get_batch_attention_weights(batch) for batch in batched_inputs
+        ]
+        attention_weights = {}
+        attention_weights[k] = []
+        for batch_weights in attention_by_batch:
+            attention_weights[k].append(batch_weights[k])
+
+        if len(attention_weights[k][0].shape) == 4:
+            tmp = np.concatenate(attention_weights[k], axis=1)
+        else:
+            tmp = np.concatenate(attention_weights[k], axis=0)
+
+        del attention_weights[k]
+        gc.collect()
+        attention_weights[k] = tmp
+
+        attention_weights["identifiers"] = identifiers[:, 0, 0]
+        attention_weights["time"] = time[:, :, 0]
+
+        return attention_weights
